@@ -1,28 +1,162 @@
 ---
 import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Ornament from '../components/Ornament.astro';
 import { u } from '../lib/site';
+
+const facts = [
+  { label: 'الميلاد', value: '١٩٠٨ م', note: 'قرية الدر، النوبة' },
+  { label: 'الوفاة', value: '١٩٨٧ م', note: 'رحمه الله' },
+  { label: 'التلميذ الحامل لتراثه', value: 'الشيخ فتح الله حمودة', note: 'مفرّغ دروسه' },
+];
+
+const fields = [
+  { title: 'العقيدة والتوحيد', text: 'تصحيح التوحيد في العبادة والقصد، والتحذير من الشرك الخفي.' },
+  { title: 'الفقه', text: 'فقه العبادات وفي مقدمتها الصلاة، عماد الدين.' },
+  { title: 'التفسير', text: 'تأملات في آيات القرآن وربطها بحياة المؤمن.' },
+  { title: 'تزكية النفس', text: 'تربية القلب على الإخلاص والمراقبة والزهد.' },
+];
+
+const timeline = [
+  { when: '١٩٠٨ م', title: 'المولد والنشأة', text: 'وُلد في قرية الدر بقلب النوبة، وحفظ القرآن في كُتّاب القرية، ونشأ يتيم الأب في رعاية أم صالحة.' },
+  { when: 'الشباب', title: 'عطبرة', text: 'درس في المدرسة الصناعية الثانوية بعطبرة في السودان، وعمل في ورش السكة الحديد، وبنى علمه بجهده الذاتي.' },
+  { when: 'الدعوة', title: 'مجالس العلم', text: 'قدّم أحاديث في إذاعة أم درمان، وشارك في ندوات موسم الحج في منى وعرفات، وظهر في برنامج «نور على نور».' },
+  { when: '١٩٦٣ م', title: 'لقاء الشيخ فتح الله', text: 'حضر الشيخ فتح الله إمام حمودة دروسه في عطبرة، فلازمه وصار من أقرب تلاميذه، ثم انتقلت الدروس إلى المنوفية.' },
+  { when: 'الخدمة العامة', title: 'النوبة وبلانة', text: 'مثّل النوبة في مجلس الشعب، وبعد التهجير استقر في بلانة حيث أقام مطحنًا وزرع الأرض.' },
+  { when: '١٩٨٧ م', title: 'الوفاة والأثر', text: 'توفي رحمه الله، وبقيت دروسه المسجلة ورسائله، ففرّغها تلميذه في سلسلة «الدروس الإيمانية».' },
+];
 ---
 <Base title="عن الشيخ" description="سيرة فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله (١٩٠٨ – ١٩٨٧ م).">
-  <div class="wrap split page-body">
-    <aside>
-      <div class="arch"><img src="https://shaikhmaher.com/wp-content/uploads/2026/05/shaikh-maher-young-945x1024.webp" alt="الشيخ ماهر إسماعيل جاهين في شبابه" width="945" height="1024" /></div>
-    </aside>
-    <article class="prose">
-      <p class="eyebrow">١٩٠٨ – ١٩٨٧ م</p>
-      <h1>الشيخ ماهر إسماعيل جاهين</h1>
-      <p class="note" data-pagefind-ignore>هذه سيرة مختصرة مؤقتة، وسيُنقل إليها النص الكامل من الموقع الحالي.</p>
+  <section class="pattern about-hero">
+    <div class="wrap about-inner">
+      <figure class="about-figure">
+        <div class="arch">
+          <img src="https://shaikhmaher.com/wp-content/uploads/2026/05/shaikh-maher-young-945x1024.webp" alt="الشيخ ماهر إسماعيل جاهين في شبابه" width="945" height="1024" />
+        </div>
+      </figure>
+      <div>
+        <p class="eyebrow">السيرة</p>
+        <h1>الشيخ ماهر إسماعيل جاهين</h1>
+        <p class="lead">عالم نوبي عصامي، طلب العلم بنفسه بعيدًا عن الجامعات، وجمع بين العمل بيده والدعوة بلسانه، فربّى جيلًا من التلاميذ على التوحيد وتزكية النفس.</p>
+        <dl class="facts">
+          {facts.map((f) => (
+            <div><dt>{f.label}</dt><dd>{f.value}</dd><span>{f.note}</span></div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
 
-      <h2>النشأة</h2>
-      <p>وُلد الشيخ سنة ١٩٠٨ م في قرية الدر بقلب النوبة في مصر. حفظ القرآن الكريم في كُتّاب القرية، وتوفي أبوه وهو صغير فنشأ في رعاية أم صالحة. التحق بالمدرسة الصناعية الثانوية في عطبرة بالسودان، وعمل في ورش السكة الحديد هناك.</p>
+  <div class="wrap">
+    <p class="note" data-pagefind-ignore>هذه سيرة مختصرة مؤقتة مبنية على ما في الموقع الحالي، وسيُنقل إليها النص الكامل.</p>
 
-      <h2>العلم والدعوة</h2>
-      <p>بنى الشيخ علمه بجهده الذاتي بعيدًا عن الجامعات، فكان له باع في العقيدة والفقه والتفسير وتزكية النفس. قدّم أحاديث في إذاعة أم درمان، وشارك في ندوات موسم الحج في منى وعرفات، وظهر في برنامج «نور على نور» بالتلفزيون المصري.</p>
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">علمه</p><h2>مجالات علمه</h2></div></div>
+      <div class="fields">
+        {fields.map((f, i) => (
+          <article class="card field">
+            <span class="num-badge">{'١٢٣٤'[i]}</span>
+            <h3>{f.title}</h3>
+            <p class="meta">{f.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
 
-      <h2>الحياة العامة</h2>
-      <p>مثّل النوبة في مجلس الشعب المصري، وبعد تهجير أهل النوبة استقر في بلانة حيث أقام مطحنًا وزرع الأرض.</p>
+    <Ornament />
 
-      <h2>الأثر</h2>
-      <p>توفي الشيخ رحمه الله سنة ١٩٨٧ م. وحمل تلميذه ورفيقه <a href={u('/fathallah/')}>الشيخ فتح الله إمام حمودة</a> أمانة تراثه، ففرّغ دروسه من أشرطة الكاسيت في سلسلة «الدروس الإيمانية».</p>
-    </article>
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">حياته</p><h2>محطات من حياته</h2></div></div>
+      <ol class="timeline">
+        {timeline.map((s) => (
+          <li>
+            <span class="dot" aria-hidden="true"></span>
+            <p class="when">{s.when}</p>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <Ornament />
+
+    <section class="section legacy">
+      <div class="section-head"><div><p class="eyebrow">تراثه</p><h2>ما تركه لنا</h2></div></div>
+      <div class="grid">
+        <a class="card link cta" href={u('/lessons/')}><span class="cta-icon"><Icon name="headphones" size={26} /></span><strong>الدروس الصوتية</strong><span class="meta">استمع إلى تسجيلات دروسه</span></a>
+        <a class="card link cta" href={u('/books/')}><span class="cta-icon"><Icon name="book" size={26} /></span><strong>الكتب والرسائل</strong><span class="meta">اقرأ رسائله الإيمانية</span></a>
+        <a class="card link cta" href={u('/fathallah/')}><span class="cta-icon"><Icon name="user" size={26} /></span><strong>الشيخ فتح الله حمودة</strong><span class="meta">تلميذه وحامل تراثه</span></a>
+      </div>
+    </section>
   </div>
 </Base>
+
+<style>
+  .about-hero { padding-block: 56px; margin-bottom: 40px; }
+  .about-inner { display: grid; gap: 40px; align-items: center; }
+  .about-inner > * { min-width: 0; }
+  @media (min-width: 880px) {
+    .about-inner { grid-template-columns: 300px 1fr; }
+  }
+  .about-figure { margin: 0; justify-self: center; width: min(100%, 300px); }
+  .about-figure .arch { border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .about-hero h1 { color: var(--on-deep); }
+  .about-hero .eyebrow { color: var(--gold-on-deep); }
+  .about-hero .lead { color: var(--on-deep-muted); }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+    gap: 1px;
+    margin: 28px 0 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgb(216 180 106 / 30%);
+  }
+  .facts div { background: var(--deep-2); padding: 14px 18px; display: grid; }
+  .facts dt { color: var(--on-deep-muted); font-size: 0.85rem; }
+  .facts dd { margin: 0; color: var(--gold-on-deep); font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1.5; }
+  .facts span { color: var(--on-deep-muted); font-size: 0.82rem; }
+
+  .fields { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+  .field .num-badge { margin-bottom: 12px; }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    max-width: 760px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: 9px;
+    width: 2px;
+    background: linear-gradient(var(--gold), var(--gold-soft));
+  }
+  .timeline li { position: relative; padding-inline-start: 44px; padding-bottom: 28px; }
+  .timeline li:last-child { padding-bottom: 0; }
+  .dot {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--gold);
+  }
+  .when { color: var(--gold); font-weight: 600; font-size: 0.9rem; margin-bottom: 0; }
+  .timeline h3 { margin-bottom: 4px; }
+  .timeline p:last-child { color: var(--muted); margin: 0; }
+
+  .cta { display: grid; gap: 4px; text-decoration: none; color: inherit; }
+  .cta strong { font-family: var(--font-display); font-size: 1.3rem; }
+  .cta-icon {
+    width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+    background: var(--surface-2); color: var(--accent); margin-bottom: 8px;
+  }
+</style>

@@ -1,31 +1,226 @@
 ---
-// مشغل صوتي يحفظ موضع التوقف، ويقفز إلى توقيت معين عند فتح الرابط بـ ?t=ثوانٍ
-interface Props { src: string; id: string }
-const { src, id } = Astro.props;
+// مشغل صوتي مخصص: تشغيل/إيقاف، تأخير ١٥ ثانية وتقديم ٣٠ ثانية، شريط تقدم، سرعة التشغيل،
+// ويحفظ موضع التوقف ويقفز إلى توقيت معين عند فتح الرابط بـ ?t=ثوانٍ
+import Icon from './Icon.astro';
+interface Props { src: string; id: string; title?: string; subtitle?: string }
+const { src, id, title, subtitle } = Astro.props;
 ---
-<div class="player">
-  <audio controls preload="metadata" src={src} data-audio-id={id}></audio>
-  <div class="actions" style="margin-top:10px">
-    <a class="btn ghost" href={src} download>تحميل الدرس</a>
+<div class="ap" data-audio-id={id}>
+  <audio preload="metadata" src={src}></audio>
+  <div class="ap-head">
+    <button class="ap-play" type="button" aria-label="تشغيل">
+      <svg class="i-play" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+      <svg class="i-pause" width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z" /></svg>
+    </button>
+    <div class="ap-title">
+      {subtitle && <span class="ap-sub">{subtitle}</span>}
+      {title && <strong>{title}</strong>}
+      <span class="ap-resume" hidden>استكمال من حيث توقفت</span>
+    </div>
+  </div>
+
+  <div class="ap-bar">
+    <span class="ap-time ap-cur">٠:٠٠</span>
+    <input class="ap-seek" type="range" min="0" max="0" step="1" value="0" aria-label="موضع التشغيل" />
+    <span class="ap-time ap-dur">--:--</span>
+  </div>
+
+  <div class="ap-controls">
+    <button class="ap-btn ap-back" type="button" aria-label="تأخير ١٥ ثانية" title="تأخير ١٥ ثانية">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M16 6a10 10 0 1 1-9.5 6.9" /><path d="M6 6v6h6" />
+        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">15</text>
+      </svg>
+      <span>تأخير</span>
+    </button>
+    <button class="ap-btn ap-speed" type="button" aria-label="سرعة التشغيل" title="سرعة التشغيل"><b>١×</b><span>السرعة</span></button>
+    <button class="ap-btn ap-fwd" type="button" aria-label="تقديم ٣٠ ثانية" title="تقديم ٣٠ ثانية">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M16 6a10 10 0 1 0 9.5 6.9" /><path d="M26 6v6h-6" />
+        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">30</text>
+      </svg>
+      <span>تقديم</span>
+    </button>
+    <a class="ap-btn" href={src} download aria-label="تحميل الدرس" title="تحميل الدرس"><Icon name="download" size={24} /><span>تحميل</span></a>
   </div>
 </div>
+
+<style>
+  .ap {
+    --track: var(--surface-2);
+    display: grid;
+    gap: 18px;
+  }
+  .ap-head { display: flex; align-items: center; gap: 16px; }
+  .ap-play {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 15%, transparent);
+    transition: transform 0.15s;
+  }
+  .ap-play:hover { transform: scale(1.05); }
+  .ap-play .i-pause { display: none; }
+  .ap.playing .ap-play .i-play { display: none; }
+  .ap.playing .ap-play .i-pause { display: block; }
+  .ap-title { display: grid; line-height: 1.5; min-width: 0; }
+  .ap-title strong { font-family: var(--font-display); font-size: 1.25rem; }
+  .ap-sub { color: var(--gold); font-size: 0.85rem; font-weight: 600; }
+  .ap-resume { color: var(--muted); font-size: 0.85rem; }
+
+  .ap-bar { display: flex; align-items: center; gap: 12px; }
+  .ap-time {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 0.9rem;
+    min-width: 3.2em;
+    text-align: center;
+  }
+  .ap-seek {
+    flex: 1;
+    min-width: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(to left, var(--gold) var(--p, 0%), var(--track) var(--p, 0%));
+    cursor: pointer;
+    margin: 0;
+  }
+  .ap-seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+    box-shadow: 0 1px 4px rgb(0 0 0 / 25%);
+  }
+  .ap-seek::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--surface);
+  }
+
+  .ap-controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .ap-btn {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border: 0;
+    border-radius: 12px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ap-btn:hover { background: var(--surface-2); color: var(--accent); }
+  .ap-btn span { color: var(--muted); }
+  .ap-speed b {
+    height: 30px;
+    display: grid;
+    place-items: center;
+    font-size: 1.05rem;
+    color: var(--accent);
+  }
+</style>
+
 <script>
-  for (const audio of document.querySelectorAll<HTMLAudioElement>('audio[data-audio-id]')) {
-    const key = `pos:${audio.dataset.audioId}`;
+  const AR = '٠١٢٣٤٥٦٧٨٩';
+  const ar = (s: string) => s.replace(/\d/g, (d) => AR[+d]);
+  const fmt = (sec: number) => {
+    if (!isFinite(sec)) return '--:--';
+    sec = Math.floor(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = String(sec % 60).padStart(2, '0');
+    return ar(h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`);
+  };
+  const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
+
+  for (const root of document.querySelectorAll<HTMLElement>('.ap')) {
+    const audio = root.querySelector('audio')!;
+    const play = root.querySelector<HTMLButtonElement>('.ap-play')!;
+    const seek = root.querySelector<HTMLInputElement>('.ap-seek')!;
+    const cur = root.querySelector('.ap-cur')!;
+    const dur = root.querySelector('.ap-dur')!;
+    const speed = root.querySelector<HTMLButtonElement>('.ap-speed')!;
+    const resume = root.querySelector<HTMLElement>('.ap-resume')!;
+    const key = `pos:${root.dataset.audioId}`;
     const t = Number(new URLSearchParams(location.search).get('t'));
+    let dragging = false;
+
+    const paint = () => {
+      const p = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      seek.style.setProperty('--p', `${p}%`);
+      if (!dragging) seek.value = String(Math.floor(audio.currentTime));
+      cur.textContent = fmt(audio.currentTime);
+    };
+
     audio.addEventListener('loadedmetadata', () => {
+      seek.max = String(Math.floor(audio.duration));
+      dur.textContent = fmt(audio.duration);
       let start = t;
       if (!start) {
         try { start = Number(localStorage.getItem(key)) || 0; } catch {}
+        if (start > 5) resume.hidden = false;
       }
       if (start && start < audio.duration) audio.currentTime = start;
+      paint();
     }, { once: true });
-    if (t) audio.play().catch(() => {});
+
+    play.addEventListener('click', () => (audio.paused ? audio.play() : audio.pause()));
+    audio.addEventListener('play', () => { root.classList.add('playing'); play.setAttribute('aria-label', 'إيقاف مؤقت'); resume.hidden = true; });
+    audio.addEventListener('pause', () => { root.classList.remove('playing'); play.setAttribute('aria-label', 'تشغيل'); });
+
+    const jump = (d: number) => { audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + d)); paint(); };
+    root.querySelector('.ap-back')!.addEventListener('click', () => jump(-15));
+    root.querySelector('.ap-fwd')!.addEventListener('click', () => jump(30));
+
+    seek.addEventListener('input', () => {
+      dragging = true;
+      cur.textContent = fmt(Number(seek.value));
+      seek.style.setProperty('--p', `${(Number(seek.value) / (audio.duration || 1)) * 100}%`);
+    });
+    seek.addEventListener('change', () => { audio.currentTime = Number(seek.value); dragging = false; });
+
+    speed.addEventListener('click', () => {
+      const next = SPEEDS[(SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length];
+      audio.playbackRate = next;
+      speed.querySelector('b')!.textContent = `${ar(String(next))}×`;
+    });
+
     let last = 0;
     audio.addEventListener('timeupdate', () => {
+      paint();
       if (Math.abs(audio.currentTime - last) < 5) return;
       last = audio.currentTime;
       try { localStorage.setItem(key, String(Math.floor(last))); } catch {}
     });
+
+    root.addEventListener('keydown', (e) => {
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
+      if (e.key === ' ') { e.preventDefault(); play.click(); }
+    });
+
+    if (t) audio.play().catch(() => {});
   }
 </script>

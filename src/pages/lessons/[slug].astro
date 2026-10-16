@@ -33,7 +33,7 @@ const fawaid = (await getCollection('fawaid')).filter(
 
   <div class="wrap">
     <div class="player-card card">
-      <AudioPlayer src={d.audio} id={lesson.id} />
+      <AudioPlayer src={d.audio} id={lesson.id} title={d.title} subtitle={lessonLabel(d.number)} />
     </div>
 
     <div class="lesson-body">
