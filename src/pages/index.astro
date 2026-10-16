@@ -5,6 +5,8 @@ import LessonCard from '../components/LessonCard.astro';
 import FaidaCard from '../components/FaidaCard.astro';
 import Icon from '../components/Icon.astro';
 import Ornament from '../components/Ornament.astro';
+import Poem from '../components/Poem.astro';
+import { HOME_POEM } from '../data/poems';
 import { u, ar } from '../lib/site';
 import { TOPICS, type TopicSlug } from '../lib/topics';
 
@@ -41,7 +43,7 @@ const sections = [
       </div>
       <figure class="hero-figure">
         <div class="arch">
-          <img src="https://shaikhmaher.com/wp-content/uploads/2026/05/shaikh-maher-young-945x1024.webp" alt="الشيخ ماهر إسماعيل جاهين" width="945" height="1024" />
+          <img src={u('/media/images/shaikh-maher-young.webp')} alt="الشيخ ماهر إسماعيل جاهين" width="945" height="1024" />
         </div>
       </figure>
     </div>
@@ -57,6 +59,12 @@ const sections = [
         </a>
       ))}
     </section>
+
+    <section class="section home-poem" aria-label="أبيات في الشيخ">
+      <Poem poem={HOME_POEM} showTitle={false} />
+    </section>
+
+    <Ornament />
 
     {featured && (
       <section class="featured">
@@ -89,7 +97,7 @@ const sections = [
         {books.map((b) => (
           <article class="card link book-card">
             <div class="cover">
-              {b.data.cover ? <img src={b.data.cover} alt="" loading="lazy" /> : null}
+              {b.data.cover ? <img src={u(b.data.cover)} alt="" loading="lazy" /> : null}
               <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={34} /></span>
             </div>
             <div>

@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
+import { u } from '../../lib/site';
 
 export async function getStaticPaths() {
   const books = await getCollection('books');
@@ -19,7 +20,7 @@ const { Content } = await render(book);
   <div class="wrap split">
     <aside>
       <div class="cover">
-        {d.cover && <img src={d.cover} alt={`غلاف ${d.title}`} />}
+        {d.cover && <img src={u(d.cover)} alt={`غلاف ${d.title}`} />}
         <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={44} /></span>
       </div>
     </aside>
@@ -27,7 +28,7 @@ const { Content } = await render(book);
       <div class="prose"><Content /></div>
       <h2>{d.chapterLabel}</h2>
       {d.chapters.length > 0
-        ? <ol class="points">{d.chapters.map((c) => <li>{c}</li>)}</ol>
+        ? <ol class="points">{d.chapters.map((c) => <li>{c.pdf ? <a href={c.pdf} target="_blank" rel="noopener">{c.title}</a> : c.title}</li>)}</ol>
         : <p class="empty" data-pagefind-ignore>فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
     </div>
   </div>

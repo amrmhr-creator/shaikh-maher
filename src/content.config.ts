@@ -19,6 +19,12 @@ const lessons = defineCollection({
   }),
 });
 
+// فصل كتاب: عنوان فقط، أو عنوان مع ملف PDF للفصل وصورة صفحته الأولى.
+const chapter = z.union([
+  z.string().transform((title) => ({ title, pdf: undefined, thumb: undefined })),
+  z.object({ title: z.string(), pdf: z.string().optional(), thumb: z.string().optional() }),
+]);
+
 // كتاب أو رسالة: الفصول قائمة عناوين، ونص كل فصل يضاف لاحقًا.
 const books = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/books' }),
@@ -29,7 +35,7 @@ const books = defineCollection({
     cover: z.string().optional(),
     pdf: z.string().optional(),
     chapterLabel: z.string().default('الفصول'),
-    chapters: z.array(z.string()).default([]),
+    chapters: z.array(chapter).default([]),
   }),
 });
 

@@ -8,12 +8,13 @@ import { u } from '../../lib/site';
 const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
 ---
 <Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتبه ودروسه المفرغة.">
-  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="رسائل إيمانية وتربوية وجّهها الشيخ إلى تلاميذه ومحبيه جوابًا عن أسئلتهم، وتفريغات لبعض دروسه المسجلة." />
+  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="مجموعة من الرسائل الإيمانية والكتابات التربوية التي خصَّ بها الشيخ رحمه الله أحبابه إجابةً على أسئلتهم، مضافًا إليها تفريغات لبعض تسجيلاته الصوتية ودروسه المباركة، نضعها بين يديك قراءةً واستفادة." />
+  <div class="wrap"><p class="note">خالص الدعاء بالرحمة والمغفرة لفضيلة الشيخ فتح الله حموده رحمه الله، والشكر موصول لأبنائه وطلابه على مساهمتهم المقدرة. نسأل الله العلي القدير أن يكتب أجرها وثوابها للشيوخ الأفاضل، ولكل من ساهم في إيصالها إلى الطلاب والقراء.</p></div>
   <div class="wrap books">
     {books.map((b) => (
       <article class="card book">
         <div class="cover">
-          {b.data.cover && <img src={b.data.cover} alt={`غلاف ${b.data.title}`} loading="lazy" />}
+          {b.data.cover && <img src={u(b.data.cover)} alt={`غلاف ${b.data.title}`} loading="lazy" />}
           <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={40} /></span>
         </div>
         <div>

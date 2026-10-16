@@ -1,0 +1,33 @@
+---
+// قصيدة عمودية: كل بيت صدر وعجز متقابلان، وينطوي البيت على الشاشات الضيقة.
+import type { Poem } from '../data/poems';
+interface Props { poem: Poem; showTitle?: boolean }
+const { poem, showTitle = true } = Astro.props;
+---
+<figure class="poem">
+  {showTitle && <h2 class="poem-title">{poem.title}</h2>}
+  {poem.sections.map((s) => (
+    <div class="poem-section">
+      {s.heading && <p class="poem-heading">{s.heading}</p>}
+      {s.verses.map(([sadr, ajuz]) => (
+        <p class="verse"><span>{sadr}</span><span>{ajuz}</span></p>
+      ))}
+    </div>
+  ))}
+  <figcaption>{poem.credit}</figcaption>
+</figure>
+<style>
+  .poem { margin: 2em 0; text-align: center; font-family: var(--font-display); }
+  .poem-section + .poem-section { margin-top: 1.4em; }
+  .poem-heading { color: var(--accent); font-weight: 700; margin-bottom: .6em; }
+  .verse {
+    display: grid; gap: .1em 2.5em; margin: 0 0 .7em;
+    font-size: 1.15rem; line-height: 1.9;
+  }
+  @media (min-width: 720px) {
+    .verse { grid-template-columns: 1fr 1fr; }
+    .verse span:first-child { text-align: start; }
+    .verse span:last-child { text-align: end; }
+  }
+  figcaption { margin-top: 1.2em; font-family: var(--font-body, inherit); font-size: .95rem; color: var(--muted, inherit); }
+</style>
