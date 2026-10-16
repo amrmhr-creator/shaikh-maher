@@ -1,0 +1,31 @@
+---
+// مشغل صوتي يحفظ موضع التوقف، ويقفز إلى توقيت معين عند فتح الرابط بـ ?t=ثوانٍ
+interface Props { src: string; id: string }
+const { src, id } = Astro.props;
+---
+<div class="player">
+  <audio controls preload="metadata" src={src} data-audio-id={id}></audio>
+  <div class="actions" style="margin-top:10px">
+    <a class="btn ghost" href={src} download>تحميل الدرس</a>
+  </div>
+</div>
+<script>
+  for (const audio of document.querySelectorAll<HTMLAudioElement>('audio[data-audio-id]')) {
+    const key = `pos:${audio.dataset.audioId}`;
+    const t = Number(new URLSearchParams(location.search).get('t'));
+    audio.addEventListener('loadedmetadata', () => {
+      let start = t;
+      if (!start) {
+        try { start = Number(localStorage.getItem(key)) || 0; } catch {}
+      }
+      if (start && start < audio.duration) audio.currentTime = start;
+    }, { once: true });
+    if (t) audio.play().catch(() => {});
+    let last = 0;
+    audio.addEventListener('timeupdate', () => {
+      if (Math.abs(audio.currentTime - last) < 5) return;
+      last = audio.currentTime;
+      try { localStorage.setItem(key, String(Math.floor(last))); } catch {}
+    });
+  }
+</script>

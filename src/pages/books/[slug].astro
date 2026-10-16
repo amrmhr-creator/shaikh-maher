@@ -1,0 +1,37 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const books = await getCollection('books');
+  return books.map((book) => ({ params: { slug: book.id }, props: { book } }));
+}
+const { book } = Astro.props;
+const d = book.data;
+const { Content } = await render(book);
+---
+<Base title={d.title} description={d.summary}>
+  <div class="split">
+    <aside>
+      {d.cover && <img class="cover" src={d.cover} alt={`غلاف ${d.title}`} />}
+      {d.pdf && <p style="margin-top:16px"><a class="btn" href={d.pdf} download>تحميل الكتاب كاملًا (PDF)</a></p>}
+    </aside>
+    <div>
+      <header class="page-head">
+        <p class="eyebrow">الكتب والرسائل</p>
+        <h1>{d.title}</h1>
+        <p class="lead">{d.summary}</p>
+      </header>
+      <div class="prose"><Content /></div>
+      <section class="section">
+        <h2>{d.chapterLabel}</h2>
+        {d.chapters.length > 0
+          ? <ol class="points">{d.chapters.map((c) => <li>{c}</li>)}</ol>
+          : <p class="empty" data-pagefind-ignore>فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
+      </section>
+    </div>
+  </div>
+</Base>
+<style>
+  .cover { border-radius: 12px; box-shadow: var(--shadow); max-width: 280px; }
+</style>

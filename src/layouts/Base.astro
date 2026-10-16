@@ -1,0 +1,71 @@
+---
+import '../styles/global.css';
+import { NAV, SITE_NAME, SITE_SHORT, CONTACT_EMAIL, u, ar } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = 'أرشيف تراث فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله: الدروس الصوتية والكتب والرسائل والفوائد.' } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE_SHORT}` : SITE_NAME;
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => {
+  const full = u(href);
+  return href === '/' ? path === full : path.startsWith(full);
+};
+---
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="ar_AR" />
+    <link rel="icon" href="https://shaikhmaher.com/wp-content/uploads/2026/03/cropped-logo-shaikh-maher-2.webp" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={u('/')}>
+          <img src="https://shaikhmaher.com/wp-content/uploads/2026/03/cropped-logo-shaikh-maher-2.webp" alt="" width="40" height="40" />
+          <span>{SITE_SHORT}</span>
+        </a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">القائمة</button>
+        <nav class="nav" id="nav" aria-label="القائمة الرئيسية">
+          <ul>
+            {NAV.map((item) => (
+              <li><a href={u(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="wrap" data-pagefind-body>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>© {ar(new Date().getFullYear())} — {SITE_NAME} رحمه الله</span>
+        <span>
+          <a href={u('/fathallah/')}>الشيخ فتح الله إمام حمودة</a> ·
+          <a href={`mailto:${CONTACT_EMAIL}`}>تواصل معنا</a>
+        </span>
+      </div>
+    </footer>
+    <script>
+      const btn = document.querySelector('.nav-toggle');
+      const nav = document.getElementById('nav');
+      btn?.addEventListener('click', () => {
+        const open = nav?.classList.toggle('open') ?? false;
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    </script>
+  </body>
+</html>

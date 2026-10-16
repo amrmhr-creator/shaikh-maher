@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import FaidaCard from '../../components/FaidaCard.astro';
+import { u } from '../../lib/site';
+import { TOPICS } from '../../lib/topics';
+
+const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
+---
+<Base title="الفوائد" description="فوائد قصيرة مستخرجة من دروس الشيخ ماهر جاهين وكتبه، مربوطة بمصادرها.">
+  <header class="page-head">
+    <h1>الفوائد</h1>
+    <p class="lead">مقتطفات قصيرة من كلام الشيخ، كل فائدة مربوطة بمصدرها: الدرس والدقيقة، أو الكتاب والفصل، لتستمع إليها أو تقرأها في سياقها الكامل.</p>
+    <ul class="tags">
+      {Object.entries(TOPICS).map(([slug, label]) => <li><a class="tag" href={u(`/topics/${slug}/`)}>{label}</a></li>)}
+    </ul>
+  </header>
+  {fawaid.length
+    ? <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+    : <p class="empty">لا توجد فوائد منشورة بعد.</p>}
+</Base>

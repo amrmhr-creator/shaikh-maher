@@ -1,0 +1,16 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { u, lessonLabel } from '../lib/site';
+import { TOPICS } from '../lib/topics';
+interface Props { lesson: CollectionEntry<'lessons'> }
+const { lesson } = Astro.props;
+const d = lesson.data;
+---
+<article class="card">
+  <p class="eyebrow">{lessonLabel(d.number)}</p>
+  <h3><a href={u(`/lessons/${lesson.id}/`)}>{d.title}</a></h3>
+  {d.duration && <p class="meta">المدة: {d.duration}</p>}
+  <ul class="tags">
+    {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
+  </ul>
+</article>

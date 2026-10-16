@@ -1,0 +1,19 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { u } from '../lib/site';
+import { TOPICS } from '../lib/topics';
+interface Props { faida: CollectionEntry<'fawaid'> }
+const { faida } = Astro.props;
+const d = faida.data;
+---
+<article class="card">
+  {d.quote ? <p class="quote">{d.quote}</p> : <h3><a href={u(`/fawaid/${faida.id}/`)}>{d.title}</a></h3>}
+  {!d.quote && d.summary && <p class="meta">{d.summary}</p>}
+  <p class="meta">
+    {d.media?.type === 'video' && 'مقطع مرئي · '}
+    <a href={u(`/fawaid/${faida.id}/`)}>عرض الفائدة</a>
+  </p>
+  <ul class="tags">
+    {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
+  </ul>
+</article>

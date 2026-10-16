@@ -1,0 +1,57 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import AudioPlayer from '../../components/AudioPlayer.astro';
+import FaidaCard from '../../components/FaidaCard.astro';
+import { u, lessonLabel } from '../../lib/site';
+import { TOPICS } from '../../lib/topics';
+
+export async function getStaticPaths() {
+  const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - b.data.number);
+  return lessons.map((lesson, i) => ({
+    params: { slug: lesson.id },
+    props: { lesson, prev: lessons[i - 1], next: lessons[i + 1] },
+  }));
+}
+
+const { lesson, prev, next } = Astro.props;
+const d = lesson.data;
+const { Content } = await render(lesson);
+const hasTranscript = Boolean(lesson.body?.trim());
+const fawaid = (await getCollection('fawaid')).filter(
+  (f) => f.data.status === 'published' && f.data.source?.kind === 'lesson' && f.data.source.ref === lesson.id,
+);
+---
+<Base title={d.title} description={`${lessonLabel(d.number)}: ${d.title}`}>
+  <header class="page-head">
+    <p class="eyebrow">{d.series} · {lessonLabel(d.number)}</p>
+    <h1>{d.title}</h1>
+    <ul class="tags">
+      {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
+    </ul>
+  </header>
+
+  <AudioPlayer src={d.audio} id={lesson.id} />
+
+  <section class="section">
+    <h2>موضوعات الدرس</h2>
+    <ul class="points">{d.points.map((p) => <li>{p}</li>)}</ul>
+  </section>
+
+  {fawaid.length > 0 && (
+    <section class="section">
+      <h2>فوائد من هذا الدرس</h2>
+      <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+    </section>
+  )}
+
+  <section class="section">
+    <h2>التفريغ النصي</h2>
+    {hasTranscript ? <div class="prose"><Content /></div> : <p class="empty" data-pagefind-ignore>التفريغ النصي لهذا الدرس قيد الإعداد.</p>}
+  </section>
+
+  <nav class="section actions" aria-label="التنقل بين الدروس" data-pagefind-ignore>
+    {prev && <a class="btn ghost" href={u(`/lessons/${prev.id}/`)}>→ {lessonLabel(prev.data.number)}</a>}
+    {next && <a class="btn ghost" href={u(`/lessons/${next.id}/`)}>{lessonLabel(next.data.number)} ←</a>}
+  </nav>
+</Base>

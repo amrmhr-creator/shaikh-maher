@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { u } from '../../lib/site';
+
+const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتبه ودروسه المفرغة.">
+  <header class="page-head">
+    <h1>الكتب والرسائل</h1>
+    <p class="lead">رسائل إيمانية وتربوية وجّهها الشيخ إلى تلاميذه ومحبيه جوابًا عن أسئلتهم، وتفريغات لبعض دروسه المسجلة.</p>
+  </header>
+  <div class="books">
+    {books.map((b) => (
+      <article class="card book">
+        {b.data.cover && <img src={b.data.cover} alt={`غلاف ${b.data.title}`} loading="lazy" />}
+        <div>
+          <h2><a href={u(`/books/${b.id}/`)}>{b.data.title}</a></h2>
+          <p>{b.data.summary}</p>
+          <div class="actions">
+            <a class="btn" href={u(`/books/${b.id}/`)}>تفاصيل الكتاب</a>
+            {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download>تحميل PDF</a>}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</Base>
+<style>
+  .books { display: grid; gap: 20px; }
+  .book { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .book { grid-template-columns: 180px 1fr; } }
+  .book img { border-radius: 10px; aspect-ratio: 3 / 4; object-fit: cover; max-width: 220px; }
+  .book h2 a { color: inherit; text-decoration: none; }
+</style>
