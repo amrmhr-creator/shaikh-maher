@@ -1,15 +1,17 @@
 ---
 import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
 import { u } from '../lib/site';
 const bundle = u('/pagefind/');
 ---
 <Base title="بحث" description="ابحث في دروس الشيخ ماهر جاهين وكتبه وفوائده.">
-  <header class="page-head" data-pagefind-ignore>
-    <h1>بحث في الأرشيف</h1>
-    <p class="lead">ابحث في عناوين الدروس وموضوعاتها والتفريغات والكتب والفوائد.</p>
-  </header>
-  <div id="search" data-pagefind-ignore data-bundle={bundle}></div>
-  <noscript><p class="note">البحث يحتاج إلى تفعيل جافاسكربت في المتصفح.</p></noscript>
+  <div data-pagefind-ignore>
+    <PageHero eyebrow="بحث" title="ابحث في الأرشيف" lead="في عناوين الدروس وموضوعاتها والتفريغات والكتب والفوائد." />
+    <div class="wrap">
+      <div id="search" data-bundle={bundle}></div>
+      <noscript><p class="note">البحث يحتاج إلى تفعيل جافاسكربت في المتصفح.</p></noscript>
+    </div>
+  </div>
 </Base>
 <script>
   const el = document.getElementById('search')!;
@@ -22,11 +24,13 @@ const bundle = u('/pagefind/');
   s.src = `${bundle}pagefind-ui.js`;
   s.onload = () => {
     // @ts-ignore
-    new window.PagefindUI({
+    const ui = new window.PagefindUI({
       element: '#search',
       showSubResults: true,
       translations: { placeholder: 'اكتب كلمة للبحث…', zero_results: 'لا توجد نتائج لـ [SEARCH_TERM]', clear_search: 'مسح', load_more: 'عرض المزيد' },
     });
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) ui.triggerSearch(q);
   };
   s.onerror = () => { el.textContent = 'فهرس البحث غير متاح في وضع التطوير، ويعمل بعد بناء الموقع.'; };
   document.body.append(s);

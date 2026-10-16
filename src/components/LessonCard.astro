@@ -1,16 +1,36 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { u, lessonLabel } from '../lib/site';
+import { u, ar } from '../lib/site';
 import { TOPICS } from '../lib/topics';
+import Icon from './Icon.astro';
 interface Props { lesson: CollectionEntry<'lessons'> }
 const { lesson } = Astro.props;
 const d = lesson.data;
 ---
-<article class="card">
-  <p class="eyebrow">{lessonLabel(d.number)}</p>
+<article class="card link lesson-card">
+  <div class="lesson-top">
+    <span class="num-badge">{ar(d.number)}</span>
+    <span class="play" aria-hidden="true"><Icon name="play" size={16} /></span>
+  </div>
   <h3><a href={u(`/lessons/${lesson.id}/`)}>{d.title}</a></h3>
-  {d.duration && <p class="meta">المدة: {d.duration}</p>}
+  {d.points[0] && <p class="meta excerpt">{d.points[0]}</p>}
   <ul class="tags">
     {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
   </ul>
 </article>
+<style>
+  .lesson-card { display: flex; flex-direction: column; }
+  .lesson-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .play {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+    transition: transform 0.18s;
+  }
+  .lesson-card:hover .play { transform: scale(1.1); }
+  .excerpt {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: 0;
+  }
+  .tags { margin-top: auto; padding-top: 14px; }
+</style>

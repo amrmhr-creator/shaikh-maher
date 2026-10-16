@@ -1,25 +1,27 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
 import { u } from '../../lib/site';
 
 const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
 ---
 <Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتبه ودروسه المفرغة.">
-  <header class="page-head">
-    <h1>الكتب والرسائل</h1>
-    <p class="lead">رسائل إيمانية وتربوية وجّهها الشيخ إلى تلاميذه ومحبيه جوابًا عن أسئلتهم، وتفريغات لبعض دروسه المسجلة.</p>
-  </header>
-  <div class="books">
+  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="رسائل إيمانية وتربوية وجّهها الشيخ إلى تلاميذه ومحبيه جوابًا عن أسئلتهم، وتفريغات لبعض دروسه المسجلة." />
+  <div class="wrap books">
     {books.map((b) => (
       <article class="card book">
-        {b.data.cover && <img src={b.data.cover} alt={`غلاف ${b.data.title}`} loading="lazy" />}
+        <div class="cover">
+          {b.data.cover && <img src={b.data.cover} alt={`غلاف ${b.data.title}`} loading="lazy" />}
+          <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={40} /></span>
+        </div>
         <div>
-          <h2><a href={u(`/books/${b.id}/`)}>{b.data.title}</a></h2>
-          <p>{b.data.summary}</p>
+          <h2>{b.data.title}</h2>
+          <p class="lead">{b.data.summary}</p>
           <div class="actions">
             <a class="btn" href={u(`/books/${b.id}/`)}>تفاصيل الكتاب</a>
-            {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download>تحميل PDF</a>}
+            {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download><Icon name="download" size={18} /> تحميل PDF</a>}
           </div>
         </div>
       </article>
@@ -27,9 +29,14 @@ const books = (await getCollection('books')).sort((a, b) => a.data.order - b.dat
   </div>
 </Base>
 <style>
-  .books { display: grid; gap: 20px; }
-  .book { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
-  @media (min-width: 640px) { .book { grid-template-columns: 180px 1fr; } }
-  .book img { border-radius: 10px; aspect-ratio: 3 / 4; object-fit: cover; max-width: 220px; }
-  .book h2 a { color: inherit; text-decoration: none; }
+  .books { display: grid; gap: 22px; }
+  .book { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: center; }
+  @media (min-width: 640px) { .book { grid-template-columns: 190px 1fr; } }
+  .cover {
+    position: relative; aspect-ratio: 3 / 4; max-width: 220px; width: 100%;
+    border-radius: 6px 12px 12px 6px; overflow: hidden;
+    background: var(--deep); box-shadow: -5px 0 0 var(--gold) inset, var(--shadow-lift);
+  }
+  .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+  .cover-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--gold-on-deep); }
 </style>

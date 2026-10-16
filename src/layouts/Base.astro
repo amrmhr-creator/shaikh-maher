@@ -21,6 +21,7 @@ const isCurrent = (href: string) => {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b2d25" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:locale" content="ar_AR" />
@@ -34,8 +35,8 @@ const isCurrent = (href: string) => {
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href={u('/')}>
-          <img src="https://shaikhmaher.com/wp-content/uploads/2026/03/cropped-logo-shaikh-maher-2.webp" alt="" width="40" height="40" />
-          <span>{SITE_SHORT}</span>
+          <span class="brand-mark" aria-hidden="true">م</span>
+          <span class="brand-text"><strong>{SITE_SHORT}</strong><small>تراث علمي وإيماني</small></span>
         </a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">القائمة</button>
         <nav class="nav" id="nav" aria-label="القائمة الرئيسية">
@@ -47,16 +48,31 @@ const isCurrent = (href: string) => {
         </nav>
       </div>
     </header>
-    <main id="main" class="wrap" data-pagefind-body>
+    <main id="main" data-pagefind-body>
       <slot />
     </main>
-    <footer class="site-footer">
+    <footer class="site-footer pattern">
       <div class="wrap">
-        <span>© {ar(new Date().getFullYear())} — {SITE_NAME} رحمه الله</span>
-        <span>
-          <a href={u('/fathallah/')}>الشيخ فتح الله إمام حمودة</a> ·
-          <a href={`mailto:${CONTACT_EMAIL}`}>تواصل معنا</a>
-        </span>
+        <div class="cols">
+          <div>
+            <h3>{SITE_NAME}</h3>
+            <p>أرشيف يجمع دروس الشيخ رحمه الله ورسائله وفوائده، ليبقى علمه نورًا لطلاب العلم.</p>
+          </div>
+          <div>
+            <h3>الأقسام</h3>
+            <ul>
+              {NAV.slice(1).map((item) => <li><a href={u(item.href)}>{item.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <h3>عن المشروع</h3>
+            <ul>
+              <li><a href={u('/fathallah/')}>الشيخ فتح الله إمام حمودة</a></li>
+              <li><a href={`mailto:${CONTACT_EMAIL}`}>تواصل معنا</a></li>
+            </ul>
+          </div>
+        </div>
+        <p class="bottom">© {ar(new Date().getFullYear())} · {SITE_NAME} رحمه الله</p>
       </div>
     </footer>
     <script>

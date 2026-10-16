@@ -3,9 +3,9 @@ import Base from '../layouts/Base.astro';
 import { u } from '../lib/site';
 ---
 <Base title="عن الشيخ" description="سيرة فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله (١٩٠٨ – ١٩٨٧ م).">
-  <div class="split">
+  <div class="wrap split page-body">
     <aside>
-      <img class="portrait" src="https://shaikhmaher.com/wp-content/uploads/2026/05/shaikh-maher-young-945x1024.webp" alt="الشيخ ماهر إسماعيل جاهين في شبابه" width="945" height="1024" />
+      <div class="arch"><img src="https://shaikhmaher.com/wp-content/uploads/2026/05/shaikh-maher-young-945x1024.webp" alt="الشيخ ماهر إسماعيل جاهين في شبابه" width="945" height="1024" /></div>
     </aside>
     <article class="prose">
       <p class="eyebrow">١٩٠٨ – ١٩٨٧ م</p>
@@ -26,6 +26,3 @@ import { u } from '../lib/site';
     </article>
   </div>
 </Base>
-<style>
-  .portrait { border-radius: 12px; box-shadow: var(--shadow); max-width: 280px; }
-</style>

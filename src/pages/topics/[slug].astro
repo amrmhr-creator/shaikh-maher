@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
 import LessonCard from '../../components/LessonCard.astro';
 import FaidaCard from '../../components/FaidaCard.astro';
 import { TOPICS, TOPIC_SLUGS, type TopicSlug } from '../../lib/topics';
@@ -16,18 +17,17 @@ const lessons = (await getCollection('lessons'))
 const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published' && f.data.topics.includes(slug));
 ---
 <Base title={label} description={`دروس الشيخ ماهر جاهين وفوائده في موضوع ${label}.`}>
-  <header class="page-head">
-    <p class="eyebrow">موضوع</p>
-    <h1>{label}</h1>
-  </header>
-  {fawaid.length > 0 && (
-    <section>
-      <h2>الفوائد</h2>
-      <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+  <PageHero eyebrow="موضوع" title={label} />
+  <div class="wrap">
+    {fawaid.length > 0 && (
+      <section>
+        <div class="section-head"><h2>الفوائد</h2></div>
+        <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+      </section>
+    )}
+    <section class={fawaid.length > 0 ? 'section' : ''}>
+      <div class="section-head"><h2>الدروس</h2></div>
+      {lessons.length ? <div class="grid">{lessons.map((l) => <LessonCard lesson={l} />)}</div> : <p class="empty">لا توجد دروس في هذا الموضوع بعد.</p>}
     </section>
-  )}
-  <section class={fawaid.length > 0 ? 'section' : ''}>
-    <h2>الدروس</h2>
-    {lessons.length ? <div class="grid">{lessons.map((l) => <LessonCard lesson={l} />)}</div> : <p class="empty">لا توجد دروس في هذا الموضوع بعد.</p>}
-  </section>
+  </div>
 </Base>
