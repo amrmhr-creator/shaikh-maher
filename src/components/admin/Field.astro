@@ -1,0 +1,100 @@
+---
+// حقل واحد في نموذج لوحة التحكم، ويستدعي نفسه للحقول المركبة (المصدر، الفصول).
+import type { Field, Option } from '../../lib/admin';
+import { valueAt } from '../../lib/admin';
+import { u } from '../../lib/site';
+
+interface Props {
+  field: Field;
+  data: Record<string, any>;
+  prefix?: string;
+  refs?: Record<string, { label: string; options: Option[] }>;
+}
+const { field: f, data, prefix = '', refs = {} } = Astro.props;
+const name = prefix + f.name;
+const id = `f-${name.replace(/[^\w-]/g, '-')}`;
+const value = valueAt(data, f.name);
+const str = value == null ? '' : String(value);
+const preview = (v: string) => (/^(https?:)?\/\//.test(v) ? v : u(v));
+---
+{f.type === 'object' ? (
+  <fieldset class="group">
+    <legend>{f.label}</legend>
+    {f.help && <p class="help">{f.help}</p>}
+    {f.fields.map((sub) => <Astro.self field={sub} data={value ?? {}} prefix={`${name}.`} refs={refs} />)}
+  </fieldset>
+) : f.type === 'list' ? (
+  <fieldset class="group list" data-list={name}>
+    <legend>{f.label}</legend>
+    <ol class="items">
+      {((value as any[]) ?? []).map((item, i) => (
+        <li class="item">
+          <div class="item-tools">
+            <span class="item-label">{f.itemLabel}</span>
+            <button type="button" class="link" data-move="-1" title="لأعلى">▲</button>
+            <button type="button" class="link" data-move="1" title="لأسفل">▼</button>
+            <button type="button" class="link danger" data-remove>حذف</button>
+          </div>
+          {f.fields.map((sub) => <Astro.self field={sub} data={typeof item === 'object' ? item : { title: item }} prefix={`${name}.${i}.`} refs={refs} />)}
+        </li>
+      ))}
+    </ol>
+    <template>
+      <li class="item">
+        <div class="item-tools">
+          <span class="item-label">{f.itemLabel}</span>
+          <button type="button" class="link" data-move="-1" title="لأعلى">▲</button>
+          <button type="button" class="link" data-move="1" title="لأسفل">▼</button>
+          <button type="button" class="link danger" data-remove>حذف</button>
+        </div>
+        {f.fields.map((sub) => <Astro.self field={sub} data={{}} prefix={`${name}.__i__.`} refs={refs} />)}
+      </li>
+    </template>
+    <button type="button" class="btn ghost" data-add>+ إضافة {f.itemLabel}</button>
+  </fieldset>
+) : (
+  <div class="field">
+    <label for={id}>{f.label}{f.required && <span class="req"> *</span>}</label>
+    {f.type === 'string' && <input id={id} name={name} value={str} required={f.required} />}
+    {f.type === 'number' && <input id={id} name={name} value={str} inputmode="numeric" required={f.required} class="short" />}
+    {f.type === 'text' && <textarea id={id} name={name} rows="3" required={f.required}>{str}</textarea>}
+    {f.type === 'lines' && <textarea id={id} name={name} rows="5">{((value as string[]) ?? []).join('\n')}</textarea>}
+    {f.type === 'markdown' && <textarea id={id} name={name} rows="14" class="md">{str}</textarea>}
+    {f.type === 'select' && (
+      <select id={id} name={name}>
+        <option value="">اختر…</option>
+        {f.options.map(([v, l]) => <option value={v} selected={v === str}>{l}</option>)}
+      </select>
+    )}
+    {f.type === 'ref' && (
+      <select id={id} name={name}>
+        <option value="">بدون مصدر</option>
+        {f.collections.map((c) => refs[c] && (
+          <optgroup label={refs[c].label}>
+            {refs[c].options.map(([v, l]) => <option value={v} selected={v === str}>{l}</option>)}
+          </optgroup>
+        ))}
+      </select>
+    )}
+    {f.type === 'checkboxes' && (
+      <div class="checks">
+        {f.options.map(([v, l]) => (
+          <label class="check"><input type="checkbox" name={name} value={v} checked={((value as string[]) ?? []).includes(v)} /> {l}</label>
+        ))}
+      </div>
+    )}
+    {(f.type === 'image' || f.type === 'file') && (
+      <div class="upload">
+        {str && f.type === 'image' && <img class="thumb" src={preview(str)} alt="" />}
+        {str && f.type === 'file' && <a class="current" href={preview(str)} target="_blank">فتح الملف الحالي ↗</a>}
+        <label class="pick">
+          <span>{str ? 'استبدال بملف من جهازك' : 'رفع ملف من جهازك'}</span>
+          <input type="file" name={`${name}.__file`} accept={f.accept} />
+        </label>
+        <input id={id} name={name} value={str} dir="ltr" placeholder="أو الصق رابط الملف هنا" class="url" />
+      </div>
+    )}
+    {f.type === 'markdown' && <p class="help">سطر فارغ بين الفقرات، و## في أول السطر لعنوان فرعي، و**كلمة** للخط العريض.</p>}
+    {f.help && <p class="help">{f.help}</p>}
+  </div>
+)}

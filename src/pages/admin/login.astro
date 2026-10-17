@@ -1,0 +1,44 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { clientIp, isHttps, login, loginBlocked, setSession } from '../../lib/auth';
+import { u } from '../../lib/site';
+
+const nextRaw = Astro.url.searchParams.get('next') ?? '';
+const next = nextRaw.startsWith(u('/admin')) ? nextRaw : u('/admin/');
+if (Astro.locals.user) return Astro.redirect(next);
+
+let error = '';
+let username = '';
+if (Astro.request.method === 'POST') {
+  const ip = clientIp(Astro.request, Astro.clientAddress);
+  const form = await Astro.request.formData();
+  username = String(form.get('username') ?? '').trim();
+  if (loginBlocked(ip)) {
+    error = 'محاولات كثيرة خاطئة. حاول مرة أخرى بعد ربع ساعة.';
+  } else {
+    const user = await login(username, String(form.get('password') ?? ''), ip);
+    if (user) {
+      setSession(Astro.cookies, user, isHttps(Astro.request));
+      return Astro.redirect(next, 303);
+    }
+    error = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+  }
+  Astro.response.status = 401;
+}
+---
+<Admin title="تسجيل الدخول">
+  <form method="post" class="card login">
+    <h1>لوحة التحكم</h1>
+    <p class="muted">موقع تراث الشيخ ماهر جاهين</p>
+    {error && <p class="alert error">{error}</p>}
+    <div class="field">
+      <label for="username">اسم المستخدم</label>
+      <input id="username" name="username" value={username} autocomplete="username" required autofocus />
+    </div>
+    <div class="field">
+      <label for="password">كلمة المرور</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required />
+    </div>
+    <button class="btn wide">دخول</button>
+  </form>
+</Admin>

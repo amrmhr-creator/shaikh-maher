@@ -1,9 +1,14 @@
 import { defineConfig } from 'astro/config';
+import node from '@astrojs/node';
 
-// Preview build runs on GitHub Pages under /shaikh-maher.
-// When the site moves to shaikhmaher.com, set SITE_URL and BASE_PATH=/ in the workflow.
+// الموقع يعمل كتطبيق Node.js على الاستضافة: الصفحات تُقرأ من قاعدة البيانات عند كل طلب،
+// فأي تعديل من لوحة التحكم (/admin) يظهر مباشرة بدون إعادة بناء.
 export default defineConfig({
-  site: process.env.SITE_URL ?? 'https://amrmhr-creator.github.io',
-  base: process.env.BASE_PATH ?? '/shaikh-maher',
-  trailingSlash: 'always',
+  site: process.env.SITE_URL ?? 'https://shaikhmaher.com',
+  base: process.env.BASE_PATH ?? '/',
+  trailingSlash: 'ignore',
+  output: 'server',
+  adapter: node({ mode: 'standalone' }),
+  // التحقق من مصدر النماذج يتم في src/middleware.ts لأنه يعمل خلف بروكسي الاستضافة.
+  security: { checkOrigin: false },
 });

@@ -1,0 +1,82 @@
+---
+// إضافة عنصر جديد (/admin/<النوع>/new/) أو تعديل عنصر موجود.
+import Admin from '../../../layouts/Admin.astro';
+import EntryForm from '../../../components/admin/EntryForm.astro';
+import { ADMIN, isCollection, prepareFawaid, readForm, validate, type Option } from '../../../lib/admin';
+import { deleteEntry, getCollection, getEntry, saveEntry, uniqueId } from '../../../lib/content';
+import { u, lessonLabel } from '../../../lib/site';
+
+const { collection, id } = Astro.params;
+if (!isCollection(collection) || !id) return Astro.rewrite('/404/');
+const conf = ADMIN[collection];
+const isNew = id === 'new';
+const entry = isNew ? undefined : await getEntry(collection, id);
+if (!isNew && !entry) return Astro.rewrite('/404/');
+
+const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - b.data.number);
+const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
+const refs: Record<string, { label: string; options: Option[] }> = {
+  lessons: { label: 'الدروس', options: lessons.map((l) => [l.id, `${lessonLabel(l.data.number)}: ${l.data.title}`] as const) },
+  books: { label: 'الكتب', options: books.map((b) => [b.id, b.data.title] as const) },
+};
+
+let data: Record<string, any> = entry ? { ...entry.data, body: entry.body } : {};
+let errors: string[] = [];
+const saved = Astro.url.searchParams.get('done') === 'saved';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData();
+    if (form.get('_action') === 'delete' && entry) {
+      await deleteEntry(collection, entry.id);
+      return Astro.redirect(u(`/admin/${collection}/?done=deleted`), 303);
+    }
+    data = await readForm(conf.fields, form);
+    if (collection === 'fawaid') prepareFawaid(data, new Set(lessons.map((l) => l.id)));
+    const result = validate(collection, data);
+    if (!result.ok) {
+      errors = result.errors;
+    } else {
+      let newId = entry?.id;
+      if (!newId) {
+        const fixed = conf.idFrom?.(result.data);
+        if (fixed && (await getEntry(collection, fixed))) {
+          errors = [`يوجد ${conf.singular} بنفس الرقم بالفعل.`];
+        } else {
+          newId = fixed || (await uniqueId(collection, conf.title({ data: result.data } as any)));
+        }
+      }
+      if (newId && !errors.length) {
+        await saveEntry(collection, newId, result.data as any, result.body, { create: isNew });
+        return Astro.redirect(u(`/admin/${collection}/${encodeURIComponent(newId)}/?done=saved`), 303);
+      }
+    }
+  } catch (err) {
+    errors = [err instanceof Error ? err.message : String(err)];
+    console.error(err);
+  }
+  Astro.response.status = 422;
+}
+const title = isNew ? conf.newLabel : conf.title({ data: entry!.data } as any);
+---
+<Admin title={title}>
+  <p class="crumbs"><a href={u(`/admin/${collection}/`)}>{conf.label}</a> ‹</p>
+  <div class="head">
+    <h1>{title}</h1>
+    {entry && <a class="btn ghost" href={u(conf.href(entry.id))} target="_blank">عرض على الموقع ↗</a>}
+  </div>
+  {saved && <p class="alert ok">تم الحفظ، والتعديل ظاهر على الموقع الآن.</p>}
+  {errors.length > 0 && (
+    <div class="alert error">
+      <strong>لم يتم الحفظ:</strong>
+      <ul>{errors.map((e) => <li>{e}</li>)}</ul>
+    </div>
+  )}
+  <EntryForm fields={conf.fields} data={data} refs={refs} submit={isNew ? 'إضافة' : 'حفظ التعديلات'}>
+    {entry && (
+      <button slot="actions" class="btn danger" name="_action" value="delete" formnovalidate onclick={`return confirm('حذف «${title.replace(/'/g, '')}» نهائيًا؟')`}>
+        حذف
+      </button>
+    )}
+  </EntryForm>
+</Admin>

@@ -1,17 +1,14 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getEntry, renderBody } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
 import { u } from '../../lib/site';
 
-export async function getStaticPaths() {
-  const books = await getCollection('books');
-  return books.map((book) => ({ params: { slug: book.id }, props: { book } }));
-}
-const { book } = Astro.props;
+const book = await getEntry('books', Astro.params.slug ?? '');
+if (!book) return Astro.rewrite('/404/');
 const d = book.data;
-const { Content } = await render(book);
+const html = renderBody(book);
 ---
 <Base title={d.title} description={d.summary}>
   <PageHero eyebrow="الكتب والرسائل" title={d.title} lead={d.summary}>
@@ -25,11 +22,11 @@ const { Content } = await render(book);
       </div>
     </aside>
     <div>
-      <div class="prose"><Content /></div>
+      {html && <div class="prose" set:html={html} />}
       <h2>{d.chapterLabel}</h2>
       {d.chapters.length > 0
         ? <ol class="points">{d.chapters.map((c) => <li>{c.pdf ? <a href={c.pdf} target="_blank" rel="noopener">{c.title}</a> : c.title}</li>)}</ol>
-        : <p class="empty" data-pagefind-ignore>فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
+        : <p class="empty">فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
     </div>
   </div>
 </Base>
