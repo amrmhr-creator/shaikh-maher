@@ -60,6 +60,7 @@ post 303 -F "images=@$T/test.png;type=image/png" -F 'person=fathallah' -F 'capti
 req 200 "$B/gallery/"; has 'صورة تجربة للشيخ فتح الله'
 img=$(grep -o '/uploads/gallery/[^"]*\.png' "$OUT" | head -1)
 [ -n "$img" ] || fail 'uploaded image url not found on gallery page'
+echo "uploaded: $img"
 req 200 "$B$img"
 req 206 -H 'Range: bytes=0-3' "$B$img"
 req 200 "$B/admin/gallery/"

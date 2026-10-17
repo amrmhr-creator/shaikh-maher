@@ -51,7 +51,9 @@ jobs:
       - run: bash scripts/smoke-test.sh http://127.0.0.1:4321
       - name: Server log
         if: always()
-        run: cat server.log || true
+        run: |
+          cat server.log || true
+          ls -laR /tmp/uploads || true
       - name: Commit updated lockfile
         if: github.event_name == 'push' && github.ref != 'refs/heads/main'
         run: |
