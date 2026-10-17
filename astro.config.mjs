@@ -9,6 +9,8 @@ export default defineConfig({
   trailingSlash: 'ignore',
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+  // يستمع على كل الواجهات حتى يصل إليه بروكسي الاستضافة (HOST في البيئة يغيّر ذلك).
+  server: { host: true },
   // التحقق من مصدر النماذج يتم في src/middleware.ts لأنه يعمل خلف بروكسي الاستضافة.
   security: { checkOrigin: false },
 });
