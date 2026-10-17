@@ -1,0 +1,27 @@
+name: Preview probe
+
+# يفتح صفحات الموقع التجريبي على Hostinger (المسجل في .hostinger/site.json) ويعرض حالتها.
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths: ['.hostinger/**', '.github/workflows/preview.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe pages
+        run: |
+          D="https://$(jq -r .domain .hostinger/site.json)"
+          for p in / /lessons/01/ /books/rasayel/ /gallery/ /admin/login/ /media/images/sheikh-photo.webp; do
+            code=$(curl -s -o page.html -w '%{http_code}' --max-time 60 "$D$p")
+            title=$(grep -o '<title>[^<]*' page.html | head -1 | sed 's/<title>//')
+            echo "$code $p  $title"
+          done
+          echo '--- first lines of /'
+          curl -s --max-time 60 "$D/" | head -c 1500

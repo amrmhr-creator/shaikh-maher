@@ -1,1 +1,1 @@
-{ "domain": "dimgrey-gerbil-355388.hostingersite.com", "username": "u981746688", "type": "nodejs" }
+{ "domain": "dimgrey-gerbil-355388.hostingersite.com", "username": "u981746688", "type": "nodejs", "app_type": "express", "entry_file": "dist/server/entry.mjs" }
