@@ -100,7 +100,7 @@ req 200 "$B$bid"; has 'الفصل الأول'; has 'https://media.shaikhmaher.co
 
 echo '== account + logout'
 post 200 -F '_action=add' -F 'username=editor' -F 'password=editor-pass-1' "$B/admin/account/"; has 'editor'
-post 303 "$B/admin/logout/"
+post 303 -d '' "$B/admin/logout/"
 req 302 "$B/admin/"
 
 echo "All $pass checks passed."
