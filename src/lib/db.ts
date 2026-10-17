@@ -8,11 +8,18 @@ const env = process.env;
 let pool: mysql.Pool | undefined;
 let ready: Promise<void> | undefined;
 
+// على Hostinger قد يُعطى العنوان localhost، وفي Node قد يتحول إلى ::1 الذي لا يقبله MySQL هناك.
+const ipv4 = (host?: string) => (!host || host === 'localhost' ? '127.0.0.1' : host);
+
 function createPool() {
   const common = { charset: 'utf8mb4', connectionLimit: 5, waitForConnections: true, timezone: 'Z' } as const;
-  if (env.DATABASE_URL) return mysql.createPool({ uri: env.DATABASE_URL, ...common });
+  if (env.DATABASE_URL) {
+    const url = new URL(env.DATABASE_URL);
+    url.hostname = ipv4(url.hostname);
+    return mysql.createPool({ uri: url.toString(), ...common });
+  }
   return mysql.createPool({
-    host: env.DB_HOST ?? '127.0.0.1',
+    host: ipv4(env.DB_HOST),
     port: Number(env.DB_PORT ?? 3306),
     user: env.DB_USER,
     password: env.DB_PASSWORD,
