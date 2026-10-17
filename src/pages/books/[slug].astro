@@ -26,7 +26,7 @@ const html = renderBody(book);
       <h2>{d.chapterLabel}</h2>
       {d.chapters.length > 0
         ? <ol class="points">{d.chapters.map((c) => <li>{c.pdf ? <a href={c.pdf} target="_blank" rel="noopener">{c.title}</a> : c.title}</li>)}</ol>
-        : <p class="empty" data-pagefind-ignore>فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
+        : <p class="empty">فهرس {d.chapterLabel} ونصوصها المقروءة قيد النقل إلى الموقع الجديد.</p>}
     </div>
   </div>
 </Base>

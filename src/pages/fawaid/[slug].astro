@@ -38,7 +38,7 @@ if (d.source?.kind === 'lesson') {
       <ul class="tags">
         {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
       </ul>
-      <div class="actions" style="margin-top:20px" data-pagefind-ignore>
+      <div class="actions" style="margin-top:20px">
         <button class="btn share" type="button" data-title={d.title}><Icon name="share" size={18} /> مشاركة الفائدة</button>
         {d.media && <a class="btn ghost" href={d.media.url} download><Icon name="download" size={18} /> تحميل المقطع</a>}
       </div>
