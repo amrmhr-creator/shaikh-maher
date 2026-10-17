@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import LessonCard from '../../components/LessonCard.astro';
+import FaidaCard from '../../components/FaidaCard.astro';
+import { TOPICS, TOPIC_SLUGS, type TopicSlug } from '../../lib/topics';
+
+export function getStaticPaths() {
+  return TOPIC_SLUGS.map((slug) => ({ params: { slug } }));
+}
+const slug = Astro.params.slug as TopicSlug;
+const label = TOPICS[slug];
+const lessons = (await getCollection('lessons'))
+  .filter((l) => l.data.topics.includes(slug))
+  .sort((a, b) => a.data.number - b.data.number);
+const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published' && f.data.topics.includes(slug));
+---
+<Base title={label} description={`دروس الشيخ ماهر جاهين وفوائده في موضوع ${label}.`}>
+  <PageHero eyebrow="موضوع" title={label} />
+  <div class="wrap">
+    {fawaid.length > 0 && (
+      <section>
+        <div class="section-head"><h2>الفوائد</h2></div>
+        <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+      </section>
+    )}
+    <section class={fawaid.length > 0 ? 'section' : ''}>
+      <div class="section-head"><h2>الدروس</h2></div>
+      {lessons.length ? <div class="grid">{lessons.map((l) => <LessonCard lesson={l} />)}</div> : <p class="empty">لا توجد دروس في هذا الموضوع بعد.</p>}
+    </section>
+  </div>
+</Base>

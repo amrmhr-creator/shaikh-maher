@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import { u } from '../../lib/site';
+
+const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
+---
+<Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتبه ودروسه المفرغة.">
+  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="مجموعة من الرسائل الإيمانية والكتابات التربوية التي خصَّ بها الشيخ رحمه الله أحبابه إجابةً على أسئلتهم، مضافًا إليها تفريغات لبعض تسجيلاته الصوتية ودروسه المباركة، نضعها بين يديك قراءةً واستفادة." />
+  <div class="wrap"><p class="note">خالص الدعاء بالرحمة والمغفرة لفضيلة الشيخ فتح الله حموده رحمه الله، والشكر موصول لأبنائه وطلابه على مساهمتهم المقدرة. نسأل الله العلي القدير أن يكتب أجرها وثوابها للشيوخ الأفاضل، ولكل من ساهم في إيصالها إلى الطلاب والقراء.</p></div>
+  <div class="wrap books">
+    {books.map((b) => (
+      <article class="card book">
+        <div class="cover">
+          {b.data.cover && <img src={u(b.data.cover)} alt={`غلاف ${b.data.title}`} loading="lazy" />}
+          <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={40} /></span>
+        </div>
+        <div>
+          <h2>{b.data.title}</h2>
+          <p class="lead">{b.data.summary}</p>
+          <div class="actions">
+            <a class="btn" href={u(`/books/${b.id}/`)}>تفاصيل الكتاب</a>
+            {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download><Icon name="download" size={18} /> تحميل PDF</a>}
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</Base>
+<style>
+  .books { display: grid; gap: 22px; }
+  .book { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: center; }
+  @media (min-width: 640px) { .book { grid-template-columns: 190px 1fr; } }
+  .cover {
+    position: relative; aspect-ratio: 3 / 4; max-width: 220px; width: 100%;
+    border-radius: 6px 12px 12px 6px; overflow: hidden;
+    background: var(--deep); box-shadow: -5px 0 0 var(--gold) inset, var(--shadow-lift);
+  }
+  .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+  .cover-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--gold-on-deep); }
+</style>

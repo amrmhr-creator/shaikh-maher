@@ -1,0 +1,67 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Icon from '../../components/Icon.astro';
+import { u, toSeconds, lessonLabel } from '../../lib/site';
+import { TOPICS } from '../../lib/topics';
+
+export async function getStaticPaths() {
+  const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
+  return fawaid.map((faida) => ({ params: { slug: faida.id }, props: { faida } }));
+}
+const { faida } = Astro.props;
+const d = faida.data;
+const { Content } = await render(faida);
+
+let sourceLink: { href: string; label: string } | undefined;
+if (d.source?.kind === 'lesson') {
+  const lesson = await getEntry('lessons', d.source.ref);
+  if (lesson) {
+    const t = toSeconds(d.source.at);
+    sourceLink = {
+      href: u(`/lessons/${lesson.id}/${t ? `?t=${t}` : ''}`),
+      label: `${lessonLabel(lesson.data.number)}: ${lesson.data.title}${d.source.at ? ` (عند ${d.source.at})` : ''}`,
+    };
+  }
+} else if (d.source?.kind === 'book') {
+  const book = await getEntry('books', d.source.ref);
+  if (book) sourceLink = { href: u(`/books/${book.id}/`), label: `${book.data.title}${d.source.chapter ? `، ${d.source.chapter}` : ''}` };
+}
+---
+<Base title={d.title} description={d.quote ?? d.summary}>
+  <PageHero eyebrow="فائدة" title={d.title} lead={d.quote ? undefined : d.summary} />
+  <div class="wrap">
+    <article class="card faida">
+      {d.quote && <blockquote class="quote">{d.quote}</blockquote>}
+      {d.media?.type === 'video' && <video controls preload="metadata" src={d.media.url}></video>}
+      {d.media?.type === 'audio' && <audio controls preload="metadata" src={d.media.url}></audio>}
+      <div class="prose"><Content /></div>
+      {sourceLink && <p class="note">المصدر: <a href={sourceLink.href}>{sourceLink.label}</a></p>}
+      <ul class="tags">
+        {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
+      </ul>
+      <div class="actions" style="margin-top:20px" data-pagefind-ignore>
+        <button class="btn share" type="button" data-title={d.title}><Icon name="share" size={18} /> مشاركة الفائدة</button>
+        {d.media && <a class="btn ghost" href={d.media.url} download><Icon name="download" size={18} /> تحميل المقطع</a>}
+      </div>
+    </article>
+  </div>
+</Base>
+<style>
+  .faida { max-width: 820px; margin-top: -72px; }
+  .faida video { margin-bottom: 16px; background: #000; }
+</style>
+<script>
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('button.share')) {
+    btn.addEventListener('click', async () => {
+      const data = { title: btn.dataset.title, url: location.href };
+      if (navigator.share) {
+        try { await navigator.share(data); } catch {}
+      } else {
+        await navigator.clipboard?.writeText(location.href);
+        btn.textContent = 'تم نسخ الرابط';
+      }
+    });
+  }
+</script>

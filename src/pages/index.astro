@@ -1,0 +1,320 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import LessonCard from '../components/LessonCard.astro';
+import FaidaCard from '../components/FaidaCard.astro';
+import Icon from '../components/Icon.astro';
+import Ornament from '../components/Ornament.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import Poem from '../components/Poem.astro';
+import { HOME_POEM } from '../data/poems';
+import { u, ar } from '../lib/site';
+import { TOPICS, type TopicSlug } from '../lib/topics';
+
+const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - b.data.number);
+const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
+const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
+const featured = fawaid[0];
+const photos = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
+
+const topicCount = (slug: TopicSlug) =>
+  lessons.filter((l) => l.data.topics.includes(slug)).length + fawaid.filter((f) => f.data.topics.includes(slug)).length;
+
+const sections = [
+  { href: '/lessons/', icon: 'headphones', title: 'الدروس الصوتية', text: `${ar(lessons.length)} دروس بتسجيلات الشيخ وملخص موضوعاتها` },
+  { href: '/books/', icon: 'book', title: 'الكتب والرسائل', text: 'رسائله الإيمانية في تزكية النفس ودروسه المفرغة' },
+  { href: '/fawaid/', icon: 'quote', title: 'الفوائد', text: 'مقتطفات قصيرة من كلامه مربوطة بمصدرها' },
+  { href: '/about/', icon: 'user', title: 'عن الشيخ', text: 'سيرته من النوبة إلى عطبرة ومجالس العلم' },
+  { href: '/fathallah/', icon: 'user', title: 'الشيخ فتح الله إمام حمودة', text: 'تلميذ الشيخ وحامل تراثه' },
+  { href: '/gallery/', icon: 'image', title: 'مكتبة الصور', text: 'صور الشيخ الفردية والجماعية' },
+] as const;
+---
+<Base>
+  <section class="hero pattern">
+    <div class="wrap hero-inner">
+      <div class="hero-text">
+        <p class="eyebrow">١٩٠٨ – ١٩٨٧ م · رحمه الله</p>
+        <h1>فضيلة الشيخ<br />ماهر إسماعيل جاهين</h1>
+        <p class="lead">عالم نوبي ربّى تلاميذه على التوحيد وتزكية النفس. هنا نجمع تراثه من دروس صوتية ورسائل وفوائد، ليبقى علمه نورًا لطلاب العلم.</p>
+        <div class="actions">
+          <a class="btn gold" href={u('/lessons/')}><Icon name="headphones" size={18} /> استمع إلى الدروس</a>
+          <a class="btn on-deep" href={u('/books/')}><Icon name="book" size={18} /> تصفح الكتب</a>
+        </div>
+        <form class="hero-search" action={u('/search/')} role="search">
+          <Icon name="search" size={18} />
+          <input type="search" name="q" placeholder="ابحث في الدروس والكتب والفوائد…" aria-label="بحث" />
+        </form>
+      </div>
+      <figure class="hero-figure">
+        <div class="arch">
+          <img src={u('/media/images/shaikh-maher-young.webp')} alt="الشيخ ماهر إسماعيل جاهين" width="945" height="1024" />
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="tiles" aria-label="أقسام الموقع">
+      {sections.map((s) => (
+        <a class="card link tile" href={u(s.href)}>
+          <span class="tile-icon"><Icon name={s.icon} size={26} /></span>
+          <strong>{s.title}</strong>
+          <span class="meta">{s.text}</span>
+        </a>
+      ))}
+    </section>
+
+    <section class="section home-poem" aria-label="أبيات في الشيخ">
+      <Poem poem={HOME_POEM} eyebrow="في مدح الشيخ" preview={4} />
+    </section>
+
+    <section class="section fathallah pattern">
+      <figure class="arch"><img src={u('/media/images/shaikh-fathalla.webp')} alt="الشيخ فتح الله إمام حمودة" loading="lazy" /></figure>
+      <div>
+        <p class="eyebrow">تلميذه وحامل تراثه</p>
+        <h2>الشيخ فتح الله إمام حمودة</h2>
+        <p class="lead">المريد الأمين، وحارس الإرث، وصديق الشيخ ماهر جاهين، رحمهما الله. فرّغ دروس الشيخ من أشرطة الكاسيت، فحفظ لنا «سلسلة الدروس الإيمانية».</p>
+        <div class="actions">
+          <a class="btn gold" href={u('/fathallah/')}>سيرته كاملة</a>
+          <a class="btn on-deep" href={u('/books/dros/')}>سلسلة الدروس الإيمانية</a>
+        </div>
+      </div>
+    </section>
+
+    <Ornament />
+
+    {featured && (
+      <section class="featured">
+        <p class="eyebrow">فائدة مختارة</p>
+        <span class="big-quote" aria-hidden="true">”</span>
+        <h2>{featured.data.quote ?? featured.data.title}</h2>
+        {featured.data.summary && <p class="lead">{featured.data.summary}</p>}
+        <a class="btn" href={u(`/fawaid/${featured.id}/`)}>
+          {featured.data.media?.type === 'video' ? <><Icon name="play" size={16} /> شاهد الفائدة</> : 'اقرأ الفائدة'}
+        </a>
+      </section>
+    )}
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">استمع</p><h2>الدروس الصوتية</h2></div>
+        <a href={u('/lessons/')}>كل الدروس <Icon name="arrow" size={16} /></a>
+      </div>
+      <div class="grid">{lessons.slice(0, 6).map((l) => <LessonCard lesson={l} />)}</div>
+    </section>
+
+    <Ornament />
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">اقرأ</p><h2>الكتب والرسائل</h2></div>
+        <a href={u('/books/')}>المكتبة <Icon name="arrow" size={16} /></a>
+      </div>
+      <div class="shelf">
+        {books.map((b) => (
+          <article class="card link book-card">
+            <div class="cover">
+              {b.data.cover ? <img src={u(b.data.cover)} alt="" loading="lazy" /> : null}
+              <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={34} /></span>
+            </div>
+            <div>
+              <h3><a href={u(`/books/${b.id}/`)}>{b.data.title}</a></h3>
+              <p class="meta">{b.data.summary}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <Ornament />
+
+    {photos.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <div><p class="eyebrow">شاهد</p><h2>مكتبة الصور</h2></div>
+          <a href={u('/gallery/')}>كل الصور <Icon name="arrow" size={16} /></a>
+        </div>
+        <GalleryGrid photos={photos.slice(0, 8)} compact />
+      </section>
+    )}
+
+    <Ornament />
+
+    <section class="section">
+      <div class="section-head">
+        <div><p class="eyebrow">تصفح</p><h2>الموضوعات</h2></div>
+      </div>
+      <div class="topics">
+        {(Object.keys(TOPICS) as TopicSlug[]).map((slug) => (
+          <a class="topic" href={u(`/topics/${slug}/`)}>
+            <span>{TOPICS[slug]}</span>
+            <small>{ar(topicCount(slug))}</small>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    {fawaid.length > 1 && (
+      <section class="section">
+        <div class="section-head">
+          <div><p class="eyebrow">تأمل</p><h2>من الفوائد</h2></div>
+          <a href={u('/fawaid/')}>كل الفوائد <Icon name="arrow" size={16} /></a>
+        </div>
+        <div class="grid">{fawaid.slice(1, 4).map((f) => <FaidaCard faida={f} />)}</div>
+      </section>
+    )}
+  </div>
+</Base>
+
+<style>
+  .hero { padding-block: 56px 96px; }
+  .hero-inner > * { min-width: 0; }
+  .hero-inner {
+    display: grid;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .hero-inner { grid-template-columns: 1.35fr 1fr; }
+  }
+  .hero h1 { color: var(--on-deep); font-size: clamp(2.4rem, 6vw, 3.8rem); }
+  .hero .eyebrow { color: var(--gold-on-deep); }
+  .hero .lead { color: var(--on-deep-muted); margin-bottom: 28px; }
+  .hero-figure { margin: 0; justify-self: center; width: min(100%, 340px); }
+  .hero-figure .arch { border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .hero-search {
+    margin-top: 26px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 460px;
+    padding: 4px 18px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 8%);
+    border: 1px solid rgb(216 180 106 / 35%);
+    color: var(--on-deep-muted);
+  }
+  .hero-search input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: 0;
+    outline: 0;
+    color: var(--on-deep);
+    font: inherit;
+    padding-block: 10px;
+  }
+  .hero-search input::placeholder { color: var(--on-deep-muted); }
+
+  .tiles {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    margin-top: -56px;
+    position: relative;
+  }
+  .fathallah {
+    display: grid;
+    gap: 32px;
+    align-items: center;
+    padding: 36px;
+    border-radius: 24px;
+  }
+  .fathallah > * { min-width: 0; }
+  @media (min-width: 760px) { .fathallah { grid-template-columns: 240px 1fr; } }
+  .fathallah .arch { margin: 0; width: min(100%, 240px); justify-self: center; border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .fathallah h2 { color: var(--on-deep); }
+  .fathallah .eyebrow { color: var(--gold-on-deep); }
+  .fathallah .lead { color: var(--on-deep-muted); }
+  .tile {
+    display: grid;
+    gap: 6px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .tile strong { font-family: var(--font-display); font-size: 1.3rem; }
+  .tile-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    background: var(--surface-2);
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .featured {
+    margin-top: 64px;
+    text-align: center;
+    padding: 48px 24px;
+    border-radius: 24px;
+    background: var(--surface);
+    border: 1px solid var(--gold-soft);
+    position: relative;
+    overflow: hidden;
+  }
+  .featured .lead { margin-inline: auto; }
+  .big-quote {
+    position: absolute;
+    top: 4px;
+    inset-inline-end: 28px;
+    font-family: var(--font-display);
+    font-size: 8rem;
+    line-height: 1;
+    color: var(--gold-soft);
+    pointer-events: none;
+  }
+  .featured h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); position: relative; }
+
+  .shelf {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+  }
+  .book-card {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .cover {
+    position: relative;
+    aspect-ratio: 3 / 4;
+    border-radius: 6px 10px 10px 6px;
+    overflow: hidden;
+    background: var(--deep);
+    box-shadow: -4px 0 0 var(--gold) inset, var(--shadow);
+  }
+  .cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
+  .cover-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: var(--gold-on-deep); }
+
+  .topics {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+  }
+  .topic {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .topic:hover { border-color: var(--gold); color: var(--accent); }
+  .topic small {
+    min-width: 28px;
+    text-align: center;
+    padding: 0 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--gold);
+    font-weight: 600;
+  }
+</style>

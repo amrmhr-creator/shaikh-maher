@@ -1,0 +1,225 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Ornament from '../components/Ornament.astro';
+import { u } from '../lib/site';
+
+// النصوص منقولة كما هي من صفحة السيرة في الموقع القديم shaikhmaher.com/about
+const facts = [
+  { label: 'المولد', value: '١٩٠٨م', note: 'قرية «الدر»، بلاد النوبة، مصر' },
+  { label: 'المسيرة', value: 'عالِمٌ عصامي', note: 'بنى نفسه بالصبر والعمل بعيدًا عن أروقة الجامعات' },
+  { label: 'الرحيل', value: '١٩٨٧م', note: 'تاركًا إرثًا لا يُقدَّر في قلوب محبيه' },
+];
+
+const fields = [
+  { title: 'علوم العقيدة', text: 'أتقن أصولَ الدين، فوُهِب «قوةَ الحجة» و«المنطقَ المُفحِم» في المحافل الدولية.' },
+  { title: 'الفقه الإسلامي', text: 'تعمَّق في الأحكام بعقليةٍ مستنيرةٍ تُوازن بين النصِّ الشرعي ومقتضيات العصر.' },
+  { title: 'علم التفسير', text: 'برع في استنطاق النص القرآني، فمنحه ذلك قدرةً هائلة على تبسيط المعاني المعقدة لجمهور العامة والنخبة على حدٍّ سواء.' },
+  { title: 'تزكية النفس', text: 'تشبَّع بروح التصوف الصافي والزُّهد، فكانت كلماته تخرج من القلب لتقع في القلب مباشرة.' },
+];
+
+const formation = [
+  { when: 'عطبرة', title: 'المدرسة الثانوية الصناعية', text: 'سافر إلى أخيه بالسودان، فالتحق بالمدرسة الثانوية الصناعية بمدينة عطبرة، مما أهَّله للعمل بورش السكك الحديدية.' },
+  { when: 'عصامية الروح', title: 'ورش السكك الحديدية', text: 'لم يكن يرى في الهندسة ومنازلة الحديد إلا تسبيحًا لله في ملكوته؛ كان يطوّع الحديد بيديه ويصقل قلبه بذكره.' },
+  { when: 'العطاء المستمر', title: 'الاستقرار في بلانة', text: 'عاد إلى وطنه، وبعد تهجير بلاد النوبة استقرَّ في «بلانة»، فأسَّس مطحنًا وعمل بيده في الأرض خادمًا لأهل بلدته.' },
+];
+
+const travels = [
+  { where: 'السودان', title: 'إذاعة أم درمان', text: 'كانت له أحاديث خاصة في إذاعة أم درمان، فأصبح صوته جزءًا من وجدان الشعب السوداني، متميِّزًا ببلاغةٍ نوبيةٍ عربيةٍ فريدة.' },
+  { where: 'السعودية', title: 'مجلس العلماء', text: 'أوفدته دولةُ السودان لتمثيلها في مجلس العلماء بالسعودية، فطلب من الملك دمجَ علماء العالم الإسلامي بعلماء السعودية. استجاب الملكُ لطلبه وعرض عليه العمل، فاعتذر وآثر العودةَ لمواصلة رسالته.' },
+  { where: 'الحجاز', title: 'مواسم الحج في منى وعرفات', text: 'كانت له ندوات كثيرة في موسم الحج بمنى وعرفات، يلتقي فيها وفود الحجيج بالموعظة الحسنة والفائدة الجامعة.' },
+  { where: 'مصر', title: 'التليفزيون المصري: «نور على نور»', text: 'أحدث ظهوره مع الأستاذ أحمد فراج في برنامجه الديني الشهير «نور على نور» ضجةً كبرى؛ إذ لمس المشاهدون سَعةَ علمه، وعذوبةَ بيانه، وبساطةَ وصوله إلى القلوب.' },
+];
+
+const scholars = [
+  'الشيخ محمود شلتوت',
+  'الشيخ محمد حسين مخلوف، مفتي الجمهورية الأسبق',
+  'الشيخ أبو العيون',
+  'الشيخ عبد الحليم محمود',
+  'الشيخ الدكتور ابن فتح الله بدران',
+  'الشيخ محمد الغزالي',
+];
+---
+<Base title="عن الشيخ" description="سيرة فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله (١٩٠٨ – ١٩٨٧ م): رحلة العلم والعمل والدعوة.">
+  <section class="pattern about-hero">
+    <div class="wrap about-inner">
+      <figure class="about-figure">
+        <div class="arch">
+          <img src={u('/media/images/shaikh-maher-young.webp')} alt="الشيخ ماهر إسماعيل جاهين في شبابه" width="945" height="1024" />
+        </div>
+      </figure>
+      <div>
+        <p class="eyebrow">سيرة ومسيرة</p>
+        <h1>الشيخ ماهر إسماعيل جاهين</h1>
+        <p class="lead">رحلةُ العلم والعمل والدعوة. عالمٌ نوبيٌّ جمع بين عمق التراث وأصالة الهوية، واستطاع بعبقريّته الفطرية أن يُبسِّط المعاني لجمهور العامة والنخبة على حدٍّ سواء.</p>
+        <dl class="facts">
+          {facts.map((f) => (
+            <div><dt>{f.label}</dt><dd>{f.value}</dd><span>{f.note}</span></div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="section prose">
+      <p class="eyebrow">الفصل الأول</p>
+      <h2>الجذور والنشأة الإيمانية</h2>
+      <p>يُعدُّ الشيخ ماهر إسماعيل جاهين أحدَ أبرز الشخصيات النوبية في القرن العشرين؛ فهو العالم العلامة والداعية الذي استطاع بعبقريّته الفطرية أن يجمع بين عمق التراث الديني وأصالة الهوية، مستعينًا بسهولة البيان وعذوبة اللسان.</p>
+      <p>وُلِد رحمه الله في مصر بقرية «الدر» بقلب بلاد النوبة عام ١٩٠٨م، وحفظ القرآن الكريم كاملًا في كُتّاب القرية. لم تكن طفولتُه ممهَّدة؛ فقد غيَّبه اليُتم عن والده مبكرًا، لكنَّ الله استودعه في كنف والدةٍ صالحةٍ كانت مدرستَه الأولى في الزُّهد والورع.</p>
+      <p>في هذا البيت الذي أُسِّس على التقوى، نَمَتْ روحُه قبل بدنه، ليكون قلبُه وعاءً طاهرًا يستقبل فيوضات العلم، مما صقَل نفسَه الأبيّة وهيَّأها لبدء رحلةٍ زاخرةٍ تعبر حدودَ الجغرافيا.</p>
+      <blockquote><p>«نَمَتْ روحُه قبل بدنه، وأُسِّس بنيانُه على عين الله»</p></blockquote>
+    </section>
+
+    <Ornament />
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">الفصل الثاني</p><h2>التكوين العملي بين النوبة والسودان</h2></div></div>
+      <ol class="timeline">
+        {formation.map((s) => (
+          <li>
+            <span class="dot" aria-hidden="true"></span>
+            <p class="when">{s.when}</p>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <Ornament />
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">الفصل الثالث</p><h2>المصادر الثقافية: شموخ العقيدة ونَهَم المعرفة</h2></div></div>
+      <p class="lead">كان الشيخ شديدَ الوُلوع بحلقات العلم والذكر التي تقوم على الوعي والفهم لكتاب الله وسنة رسوله ﷺ. أقبل بنَهَمٍ لا ينطفئ على كتب التفسير والفقه، فبنى نفسَه علميًا بعيدًا عن أروقة الجامعات التقليدية، لدرجةٍ أذهلت كبارَ علماء عصره كالشيخ محمود شلتوت والشيخ محمد الغزالي، الذين رأوا فيه نِدًّا وعالِمًا لا يُشَقّ له غبار.</p>
+      <div class="fields">
+        {fields.map((f, i) => (
+          <article class="card field">
+            <span class="num-badge">{'١٢٣٤'[i]}</span>
+            <h3>{f.title}</h3>
+            <p class="meta">{f.text}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <Ornament />
+
+    <section class="section">
+      <div class="section-head"><div><p class="eyebrow">الفصل الرابع</p><h2>لقاءاتُه وجولاتُه في الدعوة</h2></div></div>
+      <p class="lead">تجاوزت شهرتُه حدودَ القرى، فأصبح سفيرًا فوق العادة للعلم والوسطية، متنقلًا بين إذاعاتٍ ومجالسَ ومؤتمراتٍ في كبرى الدول العربية.</p>
+      <div class="fields">
+        {travels.map((t) => (
+          <article class="card field">
+            <p class="eyebrow">{t.where}</p>
+            <h3>{t.title}</h3>
+            <p class="meta">{t.text}</p>
+          </article>
+        ))}
+      </div>
+      <div class="prose scholars">
+        <h3>صحبتُه لعلماء مصر</h3>
+        <p>في بلده الأم مصر، كانت للشيخ صَولاتٌ وجَولاتٌ ولقاءاتٌ ومؤتمراتٌ، وقد ربطته علاقاتٌ علميةٌ وأخويةٌ بكوكبةٍ من علماء مصر، منهم:</p>
+        <ul>{scholars.map((s) => <li>{s}</li>)}</ul>
+      </div>
+    </section>
+
+    <Ornament />
+
+    <section class="section prose">
+      <p class="eyebrow">الفصل الخامس</p>
+      <h2>الخدمة العامة: تكليفٌ لا تشريف</h2>
+      <p>مَثَّل الشيخ ماهر النوبةَ في مجلس الشعب، فرأى نفسَه خادمًا اقتضت الحاجةُ تواجدَه. مارس دورَه السياسي لا استشرافًا، بل كأمانةٍ ثقيلةٍ لتحقيق الخدمة لأهله ومجتمعه. كان حضورُه وقورًا، يتحدث بلسان الأمة ويحمل همومَ النوبة، مطوِّعًا لغتَه وحكمتَه لفضِّ النزاعات وحلِّ الأزمات بذكاءٍ فِطري.</p>
+
+      <p class="eyebrow">الخاتمة</p>
+      <h2>الرحيل والإرث (١٩٨٧م)</h2>
+      <p>رحل الشيخ ماهر إسماعيل جاهين عام ١٩٨٧م، تاركًا وراءه مدرسةً فكريةً تُبرهن على أن العالِم الحقيقي هو من يصنع نفسَه بالصبر والعمل. كان موسوعيًا بليغًا، يتحدث العربية بفصاحة النحويين، والنوبية بلسان الانتماء والجذور.</p>
+      <h3>حافظُ الأمانة: فضيلة الشيخ فتح الله إمام حمودة رحمه الله</h3>
+      <p>إنَّ الإرث الذي تركه الشيخ ماهر لم يَنطوِ بوفاته؛ فقد حمل أمانةَ البلاغ من بعده رفيقُه الوفيُّ، المربِّي الفاضلُ <a href={u('/fathallah/')}>الشيخ فتح الله حمودة</a>، الذي عكف بجهدٍ دؤوبٍ على تفريغ خطب الشيخ ودروسه من أشرطة الكاسيت، ليُخرجها للنور في سلسلة «الدروس الإيمانية في تزكية النفس البشرية».</p>
+      <blockquote><p>«أخانا القارئ الحبيب: سؤالٌ ظلَّت الإجابةُ عنه حائرةً طيلةَ سنين عديدة، يسأل المحبون والصالحون: ماذا تعرفون عن هذا الرجل الملهَم المتواضع؟ فتكون الإجابةُ بالصمت، والرجوعِ إلى الله بالشكر أن هيّأنا لمعرفة رجلٍ مثله يُنير لنا طريقَ الإيمان ويأخذ بأيدينا إلى برِّ السلام.»</p></blockquote>
+      <p>وقد أفردنا في هذا الموقع صفحةً خاصةً لعرض سيرة هذه الشخصية الفريدة، ولا يزال العمل مستمرًا لاستقصاء ما تبقّى من هذا الإرث العظيم.</p>
+    </section>
+
+    <Ornament />
+
+    <section class="section legacy">
+      <div class="section-head"><div><p class="eyebrow">تراثه</p><h2>ما تركه لنا</h2></div></div>
+      <div class="grid">
+        <a class="card link cta" href={u('/lessons/')}><span class="cta-icon"><Icon name="headphones" size={26} /></span><strong>الدروس الصوتية</strong><span class="meta">استمع إلى تسجيلات دروسه</span></a>
+        <a class="card link cta" href={u('/books/')}><span class="cta-icon"><Icon name="book" size={26} /></span><strong>الكتب والرسائل</strong><span class="meta">اقرأ رسائله الإيمانية</span></a>
+        <a class="card link cta" href={u('/fathallah/')}><span class="cta-icon"><Icon name="user" size={26} /></span><strong>الشيخ فتح الله حمودة</strong><span class="meta">تلميذه وحامل تراثه</span></a>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .about-hero { padding-block: 56px; margin-bottom: 40px; }
+  .about-inner { display: grid; gap: 40px; align-items: center; }
+  .about-inner > * { min-width: 0; }
+  @media (min-width: 880px) {
+    .about-inner { grid-template-columns: 300px 1fr; }
+  }
+  .about-figure { margin: 0; justify-self: center; width: min(100%, 300px); }
+  .about-figure .arch { border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .about-hero h1 { color: var(--on-deep); }
+  .about-hero .eyebrow { color: var(--gold-on-deep); }
+  .about-hero .lead { color: var(--on-deep-muted); }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+    gap: 1px;
+    margin: 28px 0 0;
+    border-radius: 14px;
+    overflow: hidden;
+    background: rgb(216 180 106 / 30%);
+  }
+  .facts div { background: var(--deep-2); padding: 14px 18px; display: grid; }
+  .facts dt { color: var(--on-deep-muted); font-size: 0.85rem; }
+  .facts dd { margin: 0; color: var(--gold-on-deep); font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1.5; }
+  .facts span { color: var(--on-deep-muted); font-size: 0.82rem; }
+
+  .fields { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+  .field .num-badge { margin-bottom: 12px; }
+
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    max-width: 760px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: 9px;
+    width: 2px;
+    background: linear-gradient(var(--gold), var(--gold-soft));
+  }
+  .timeline li { position: relative; padding-inline-start: 44px; padding-bottom: 28px; }
+  .timeline li:last-child { padding-bottom: 0; }
+  .dot {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--gold);
+  }
+  .when { color: var(--gold); font-weight: 600; font-size: 0.9rem; margin-bottom: 0; }
+  .timeline h3 { margin-bottom: 4px; }
+  .timeline p:last-child { color: var(--muted); margin: 0; }
+
+  .scholars { margin-top: 28px; }
+
+  .cta { display: grid; gap: 4px; text-decoration: none; color: inherit; }
+  .cta strong { font-family: var(--font-display); font-size: 1.3rem; }
+  .cta-icon {
+    width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+    background: var(--surface-2); color: var(--accent); margin-bottom: 8px;
+  }
+</style>

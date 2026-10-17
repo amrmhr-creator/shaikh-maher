@@ -1,0 +1,87 @@
+---
+import '../styles/global.css';
+import { NAV, SITE_NAME, SITE_SHORT, CONTACT_EMAIL, u, ar } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = 'أرشيف تراث فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله: الدروس الصوتية والكتب والرسائل والفوائد.' } = Astro.props;
+const fullTitle = title ? `${title} | ${SITE_SHORT}` : SITE_NAME;
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => {
+  const full = u(href);
+  return href === '/' ? path === full : path.startsWith(full);
+};
+---
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0b2d25" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="ar_AR" />
+    <link rel="icon" href={u('/media/images/favicon.webp')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={u('/')}>
+          <span class="brand-mark" aria-hidden="true">م</span>
+          <span class="brand-text"><strong>{SITE_SHORT}</strong><small>تراث علمي وإيماني</small></span>
+        </a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">القائمة</button>
+        <nav class="nav" id="nav" aria-label="القائمة الرئيسية">
+          <ul>
+            {NAV.map((item) => (
+              <li><a href={u(item.href)} aria-current={isCurrent(item.href) ? 'page' : undefined}>{item.label}</a></li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="main" data-pagefind-body>
+      <slot />
+    </main>
+    <footer class="site-footer pattern">
+      <div class="wrap">
+        <div class="cols">
+          <div>
+            <h3>{SITE_NAME}</h3>
+            <p>أرشيف يجمع دروس الشيخ رحمه الله ورسائله وفوائده، ليبقى علمه نورًا لطلاب العلم.</p>
+          </div>
+          <div>
+            <h3>الأقسام</h3>
+            <ul>
+              {NAV.slice(1).map((item) => <li><a href={u(item.href)}>{item.label}</a></li>)}
+            </ul>
+          </div>
+          <div>
+            <h3>عن المشروع</h3>
+            <ul>
+              <li><a href={u('/fathallah/')}>الشيخ فتح الله إمام حمودة</a></li>
+              <li><a href={`mailto:${CONTACT_EMAIL}`}>تواصل معنا</a></li>
+            </ul>
+          </div>
+        </div>
+        <p class="bottom">© {ar(new Date().getFullYear())} · {SITE_NAME} رحمه الله</p>
+      </div>
+    </footer>
+    <script>
+      const btn = document.querySelector('.nav-toggle');
+      const nav = document.getElementById('nav');
+      btn?.addEventListener('click', () => {
+        const open = nav?.classList.toggle('open') ?? false;
+        btn.setAttribute('aria-expanded', String(open));
+      });
+    </script>
+  </body>
+</html>

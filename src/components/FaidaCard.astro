@@ -1,0 +1,27 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { u } from '../lib/site';
+import { TOPICS } from '../lib/topics';
+import Icon from './Icon.astro';
+interface Props { faida: CollectionEntry<'fawaid'> }
+const { faida } = Astro.props;
+const d = faida.data;
+---
+<article class="card link faida-card">
+  <span class="mark" aria-hidden="true"><Icon name="quote" size={26} /></span>
+  {d.quote
+    ? <p class="quote"><a href={u(`/fawaid/${faida.id}/`)}>{d.quote}</a></p>
+    : <h3><a href={u(`/fawaid/${faida.id}/`)}>{d.title}</a></h3>}
+  {!d.quote && d.summary && <p class="meta">{d.summary}</p>}
+  <ul class="tags">
+    {d.media?.type === 'video' && <li><span class="tag"><Icon name="play" size={12} /> مقطع مرئي</span></li>}
+    {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
+  </ul>
+</article>
+<style>
+  .faida-card { background: linear-gradient(180deg, var(--surface), var(--surface-2)); }
+  .mark { color: var(--gold); display: block; margin-bottom: 8px; }
+  .quote { border: 0; padding: 0; }
+  .quote a { color: inherit; text-decoration: none; }
+  .quote a::after { content: ''; position: absolute; inset: 0; }
+</style>
