@@ -1,0 +1,54 @@
+---
+// رفع عدة صور مرة واحدة إلى مكتبة الصور.
+import Admin from '../../../layouts/Admin.astro';
+import { ADMIN } from '../../../lib/admin';
+import { getCollection, saveEntry, uniqueId } from '../../../lib/content';
+import { isUpload, saveUpload } from '../../../lib/uploads';
+import { u } from '../../../lib/site';
+
+const PEOPLE = (ADMIN.gallery.fields.find((f) => f.name === 'person') as any).options as [string, string][];
+let error = '';
+if (Astro.request.method === 'POST') {
+  try {
+    const form = await Astro.request.formData();
+    const files = form.getAll('images').filter(isUpload);
+    if (!files.length) throw new Error('اختر صورة واحدة على الأقل.');
+    const person = String(form.get('person') || 'maher') as any;
+    const caption = String(form.get('caption') ?? '').trim();
+    let order = Math.max(0, ...(await getCollection('gallery')).map((p) => p.data.order).filter((n) => n < 1000)) + 1;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) throw new Error(`الملف «${file.name}» ليس صورة.`);
+      const image = await saveUpload(file, 'gallery');
+      const text = caption || file.name.replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ');
+      const id = await uniqueId('gallery', `${String(order).padStart(3, '0')}-${text}`);
+      await saveEntry('gallery', id, { image, caption: text, person, order: order++ }, '', { create: true });
+    }
+    return Astro.redirect(u('/admin/gallery/?done=uploaded'), 303);
+  } catch (err) {
+    error = err instanceof Error ? err.message : String(err);
+    Astro.response.status = 422;
+  }
+}
+---
+<Admin title="رفع صور">
+  <p class="crumbs"><a href={u('/admin/gallery/')}>مكتبة الصور</a> ‹</p>
+  <h1>رفع صور لمكتبة الصور</h1>
+  {error && <p class="alert error">{error}</p>}
+  <form method="post" enctype="multipart/form-data" class="entry-form">
+    <div class="field">
+      <label for="images">الصور <span class="req">*</span></label>
+      <input id="images" type="file" name="images" accept="image/*" multiple required />
+      <p class="help">تقدر تختار أكثر من صورة مرة واحدة.</p>
+    </div>
+    <div class="field">
+      <label for="person">الصور لمن؟</label>
+      <select id="person" name="person">{PEOPLE.map(([v, l]) => <option value={v}>{l}</option>)}</select>
+    </div>
+    <div class="field">
+      <label for="caption">التعليق تحت الصور</label>
+      <input id="caption" name="caption" />
+      <p class="help">اختياري. لو تركته فارغًا يُستخدم اسم الملف، وتقدر تعدل تعليق كل صورة بعد الرفع.</p>
+    </div>
+    <div class="actions"><button class="btn">رفع الصور</button></div>
+  </form>
+</Admin>

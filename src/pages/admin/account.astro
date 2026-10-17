@@ -1,0 +1,78 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { addUser, changePassword, isHttps, listUsers, removeUser, setSession } from '../../lib/auth';
+
+const me = Astro.locals.user!;
+let ok = '';
+let error = '';
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('_action');
+  if (action === 'password') {
+    const next = String(form.get('next') ?? '');
+    if (next !== form.get('confirm')) error = 'كلمتا المرور الجديدتان غير متطابقتين.';
+    else {
+      const res = await changePassword(me.id, String(form.get('current') ?? ''), next);
+      if (typeof res === 'string') error = res;
+      else {
+        setSession(Astro.cookies, res, isHttps(Astro.request));
+        ok = 'تم تغيير كلمة المرور.';
+      }
+    }
+  } else if (action === 'add') {
+    const res = await addUser(String(form.get('username') ?? '').trim(), String(form.get('password') ?? ''));
+    if (res) error = res;
+    else ok = 'تمت إضافة المستخدم.';
+  } else if (action === 'remove') {
+    const id = Number(form.get('id'));
+    if (id === me.id) error = 'لا يمكنك حذف حسابك وأنت داخل به.';
+    else {
+      await removeUser(id);
+      ok = 'تم حذف المستخدم.';
+    }
+  }
+  if (error) Astro.response.status = 422;
+}
+const users = await listUsers();
+---
+<Admin title="الحساب">
+  <h1>الحساب</h1>
+  {ok && <p class="alert ok">{ok}</p>}
+  {error && <p class="alert error">{error}</p>}
+
+  <section class="card pad">
+    <h2>تغيير كلمة المرور</h2>
+    <form method="post" class="narrow">
+      <input type="hidden" name="_action" value="password" />
+      <div class="field"><label for="current">كلمة المرور الحالية</label><input id="current" name="current" type="password" autocomplete="current-password" required /></div>
+      <div class="field"><label for="next">كلمة المرور الجديدة</label><input id="next" name="next" type="password" autocomplete="new-password" minlength="8" required /></div>
+      <div class="field"><label for="confirm">تأكيد كلمة المرور الجديدة</label><input id="confirm" name="confirm" type="password" autocomplete="new-password" minlength="8" required /></div>
+      <button class="btn">حفظ</button>
+    </form>
+  </section>
+
+  <section class="card pad">
+    <h2>المستخدمون</h2>
+    <ul class="rows">
+      {users.map((usr) => (
+        <li class="row">
+          <span>{usr.username}{usr.id === me.id && <span class="muted"> (أنت)</span>}</span>
+          {usr.id !== me.id && (
+            <form method="post" onsubmit={`return confirm('حذف المستخدم ${usr.username}؟')`}>
+              <input type="hidden" name="_action" value="remove" />
+              <input type="hidden" name="id" value={usr.id} />
+              <button class="link danger">حذف</button>
+            </form>
+          )}
+        </li>
+      ))}
+    </ul>
+    <h3>إضافة مستخدم</h3>
+    <form method="post" class="narrow">
+      <input type="hidden" name="_action" value="add" />
+      <div class="field"><label for="nu">اسم المستخدم</label><input id="nu" name="username" required /></div>
+      <div class="field"><label for="np">كلمة المرور</label><input id="np" name="password" type="password" autocomplete="new-password" minlength="8" required /></div>
+      <button class="btn ghost">إضافة</button>
+    </form>
+  </section>
+</Admin>

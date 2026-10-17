@@ -1,0 +1,48 @@
+---
+import '../styles/admin.css';
+import { u } from '../lib/site';
+import { ADMIN } from '../lib/admin';
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+const user = Astro.locals.user;
+const path = Astro.url.pathname;
+const nav = [
+  { href: '/admin/', label: 'الرئيسية' },
+  ...Object.entries(ADMIN).map(([name, c]) => ({ href: `/admin/${name}/`, label: c.label })),
+  { href: '/admin/account/', label: 'الحساب' },
+];
+const isCurrent = (href: string) => (href === '/admin/' ? path === u(href) : path.startsWith(u(href)));
+---
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} | لوحة التحكم</title>
+    <link rel="icon" href={u('/media/images/favicon.webp')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    {user && (
+      <header class="bar">
+        <a class="brand" href={u('/admin/')}>لوحة التحكم</a>
+        <nav>
+          {nav.map((n) => <a href={u(n.href)} aria-current={isCurrent(n.href) ? 'page' : undefined}>{n.label}</a>)}
+        </nav>
+        <div class="who">
+          <a href={u('/')} target="_blank">عرض الموقع ↗</a>
+          <form method="post" action={u('/admin/logout/')}><button class="link">خروج</button></form>
+        </div>
+      </header>
+    )}
+    <main class="main">
+      <slot />
+    </main>
+  </body>
+</html>

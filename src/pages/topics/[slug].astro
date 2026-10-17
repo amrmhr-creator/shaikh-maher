@@ -1,15 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import LessonCard from '../../components/LessonCard.astro';
 import FaidaCard from '../../components/FaidaCard.astro';
 import { TOPICS, TOPIC_SLUGS, type TopicSlug } from '../../lib/topics';
 
-export function getStaticPaths() {
-  return TOPIC_SLUGS.map((slug) => ({ params: { slug } }));
-}
 const slug = Astro.params.slug as TopicSlug;
+if (!TOPIC_SLUGS.includes(slug)) return Astro.rewrite('/404/');
 const label = TOPICS[slug];
 const lessons = (await getCollection('lessons'))
   .filter((l) => l.data.topics.includes(slug))

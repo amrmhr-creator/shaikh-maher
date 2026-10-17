@@ -1,47 +1,43 @@
 ---
 import Base from '../layouts/Base.astro';
 import PageHero from '../components/PageHero.astro';
-import { u } from '../lib/site';
-const bundle = u('/pagefind/');
+import { u, ar } from '../lib/site';
+import { search } from '../lib/search';
+
+const q = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 100);
+const hits = q ? await search(q) : [];
 ---
 <Base title="بحث" description="ابحث في دروس الشيخ ماهر جاهين وكتبه وفوائده.">
-  <div data-pagefind-ignore>
-    <PageHero eyebrow="بحث" title="ابحث في الأرشيف" lead="في عناوين الدروس وموضوعاتها والتفريغات والكتب والفوائد." />
-    <div class="wrap">
-      <div id="search" data-bundle={bundle}></div>
-      <noscript><p class="note">البحث يحتاج إلى تفعيل جافاسكربت في المتصفح.</p></noscript>
-    </div>
+  <PageHero eyebrow="بحث" title="ابحث في الأرشيف" lead="في عناوين الدروس وموضوعاتها والتفريغات والكتب والفوائد." />
+  <div class="wrap">
+    <form class="search-form" method="get" role="search">
+      <input type="search" name="q" value={q} placeholder="اكتب كلمة للبحث…" aria-label="كلمة البحث" autofocus />
+      <button class="btn">بحث</button>
+    </form>
+    {q && (
+      hits.length
+        ? <p class="meta">{ar(hits.length)} نتيجة لـ «{q}»</p>
+        : <p class="empty">لا توجد نتائج لـ «{q}»</p>
+    )}
+    <ul class="results">
+      {hits.map((h) => (
+        <li class="card link">
+          <span class="meta">{h.kind}</span>
+          <h3><a href={u(h.href)}>{h.title}</a></h3>
+          <p>{h.snippet}</p>
+        </li>
+      ))}
+    </ul>
   </div>
 </Base>
-<script>
-  const el = document.getElementById('search')!;
-  const bundle = el.dataset.bundle!;
-  const css = document.createElement('link');
-  css.rel = 'stylesheet';
-  css.href = `${bundle}pagefind-ui.css`;
-  document.head.append(css);
-  const s = document.createElement('script');
-  s.src = `${bundle}pagefind-ui.js`;
-  s.onload = () => {
-    // @ts-ignore
-    const ui = new window.PagefindUI({
-      element: '#search',
-      showSubResults: true,
-      translations: { placeholder: 'اكتب كلمة للبحث…', zero_results: 'لا توجد نتائج لـ [SEARCH_TERM]', clear_search: 'مسح', load_more: 'عرض المزيد' },
-    });
-    const q = new URLSearchParams(location.search).get('q');
-    if (q) ui.triggerSearch(q);
-  };
-  s.onerror = () => { el.textContent = 'فهرس البحث غير متاح في وضع التطوير، ويعمل بعد بناء الموقع.'; };
-  document.body.append(s);
-</script>
-<style is:global>
-  #search {
-    --pagefind-ui-primary: var(--accent);
-    --pagefind-ui-text: var(--text);
-    --pagefind-ui-background: var(--surface);
-    --pagefind-ui-border: var(--line);
-    --pagefind-ui-tag: var(--surface-2);
-    --pagefind-ui-font: var(--font-body);
+<style>
+  .search-form { display: flex; gap: 10px; margin: 24px 0; }
+  .search-form input {
+    flex: 1; padding: 12px 16px; font: inherit;
+    border: 1px solid var(--line); border-radius: 12px;
+    background: var(--surface); color: var(--text);
   }
+  .results { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .results h3 { margin: 4px 0 6px; }
+  .results p { margin: 0; color: var(--muted); }
 </style>
