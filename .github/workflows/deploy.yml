@@ -2,7 +2,7 @@ name: Deploy preview
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/project-thread-cx3u2y]
   workflow_dispatch:
 
 permissions:
