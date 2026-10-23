@@ -5,6 +5,7 @@ import LessonCard from '../components/LessonCard.astro';
 import FaidaCard from '../components/FaidaCard.astro';
 import Icon from '../components/Icon.astro';
 import Ornament from '../components/Ornament.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
 import Poem from '../components/Poem.astro';
 import { HOME_POEM } from '../data/poems';
 import { u, ar } from '../lib/site';
@@ -14,6 +15,7 @@ const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - 
 const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
 const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
 const featured = fawaid[0];
+const photos = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
 
 const topicCount = (slug: TopicSlug) =>
   lessons.filter((l) => l.data.topics.includes(slug)).length + fawaid.filter((f) => f.data.topics.includes(slug)).length;
@@ -23,6 +25,8 @@ const sections = [
   { href: '/books/', icon: 'book', title: 'الكتب والرسائل', text: 'رسائله الإيمانية في تزكية النفس ودروسه المفرغة' },
   { href: '/fawaid/', icon: 'quote', title: 'الفوائد', text: 'مقتطفات قصيرة من كلامه مربوطة بمصدرها' },
   { href: '/about/', icon: 'user', title: 'عن الشيخ', text: 'سيرته من النوبة إلى عطبرة ومجالس العلم' },
+  { href: '/fathallah/', icon: 'user', title: 'الشيخ فتح الله إمام حمودة', text: 'تلميذ الشيخ وحامل تراثه' },
+  { href: '/gallery/', icon: 'image', title: 'مكتبة الصور', text: 'صور الشيخ الفردية والجماعية' },
 ] as const;
 ---
 <Base>
@@ -62,6 +66,19 @@ const sections = [
 
     <section class="section home-poem" aria-label="أبيات في الشيخ">
       <Poem poem={HOME_POEM} eyebrow="في مدح الشيخ" preview={4} />
+    </section>
+
+    <section class="section fathallah pattern">
+      <figure class="arch"><img src={u('/media/images/shaikh-fathalla.webp')} alt="الشيخ فتح الله إمام حمودة" loading="lazy" /></figure>
+      <div>
+        <p class="eyebrow">تلميذه وحامل تراثه</p>
+        <h2>الشيخ فتح الله إمام حمودة</h2>
+        <p class="lead">المريد الأمين، وحارس الإرث، وصديق الشيخ ماهر جاهين، رحمهما الله. فرّغ دروس الشيخ من أشرطة الكاسيت، فحفظ لنا «سلسلة الدروس الإيمانية».</p>
+        <div class="actions">
+          <a class="btn gold" href={u('/fathallah/')}>سيرته كاملة</a>
+          <a class="btn on-deep" href={u('/books/dros/')}>سلسلة الدروس الإيمانية</a>
+        </div>
+      </div>
     </section>
 
     <Ornament />
@@ -108,6 +125,18 @@ const sections = [
         ))}
       </div>
     </section>
+
+    <Ornament />
+
+    {photos.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <div><p class="eyebrow">شاهد</p><h2>مكتبة الصور</h2></div>
+          <a href={u('/gallery/')}>كل الصور <Icon name="arrow" size={16} /></a>
+        </div>
+        <GalleryGrid photos={photos.slice(0, 8)} compact />
+      </section>
+    )}
 
     <Ornament />
 
@@ -180,10 +209,23 @@ const sections = [
   .tiles {
     display: grid;
     gap: 16px;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
     margin-top: -56px;
     position: relative;
   }
+  .fathallah {
+    display: grid;
+    gap: 32px;
+    align-items: center;
+    padding: 36px;
+    border-radius: 24px;
+  }
+  .fathallah > * { min-width: 0; }
+  @media (min-width: 760px) { .fathallah { grid-template-columns: 240px 1fr; } }
+  .fathallah .arch { margin: 0; width: min(100%, 240px); justify-self: center; border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .fathallah h2 { color: var(--on-deep); }
+  .fathallah .eyebrow { color: var(--gold-on-deep); }
+  .fathallah .lead { color: var(--on-deep-muted); }
   .tile {
     display: grid;
     gap: 6px;

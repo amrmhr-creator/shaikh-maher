@@ -60,4 +60,15 @@ const fawaid = defineCollection({
   }),
 });
 
-export const collections = { lessons, books, fawaid };
+// صورة في مكتبة الصور: المسار داخل public/media، ويُرتب العرض حسب order ثم الاسم.
+const gallery = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/gallery' }),
+  schema: z.object({
+    image: z.string(),
+    caption: z.string(),
+    person: z.enum(['maher', 'fathallah', 'group', 'other']).default('maher'),
+    order: z.number().default(100),
+  }),
+});
+
+export const collections = { lessons, books, fawaid, gallery };

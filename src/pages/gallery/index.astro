@@ -1,0 +1,40 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import GalleryGrid from '../../components/GalleryGrid.astro';
+
+const photos = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
+const FILTERS = [
+  { key: 'maher', label: 'الشيخ ماهر' },
+  { key: 'fathallah', label: 'الشيخ فتح الله' },
+  { key: 'group', label: 'صور جماعية' },
+  { key: 'other', label: 'أخرى' },
+].filter((f) => photos.some((p) => p.data.person === f.key));
+---
+<Base title="مكتبة الصور" description="صور فضيلة الشيخ ماهر إسماعيل جاهين وتلميذه الشيخ فتح الله إمام حمودة.">
+  <PageHero eyebrow="شاهد" title="مكتبة الصور" lead="صور الشيخ رحمه الله، الفردية والجماعية.">
+    {FILTERS.length > 1 && (
+      <div class="filters" role="group" aria-label="تصفية الصور">
+        <button type="button" class="tag active" data-filter="all">الكل</button>
+        {FILTERS.map((f) => <button type="button" class="tag" data-filter={f.key}>{f.label}</button>)}
+      </div>
+    )}
+  </PageHero>
+  <div class="wrap">
+    {photos.length ? <GalleryGrid photos={photos} /> : <p class="empty">لا توجد صور بعد.</p>}
+  </div>
+</Base>
+<style>
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .filters .tag { border: 0; cursor: pointer; font: inherit; font-size: 0.9rem; padding: 5px 16px; }
+  .filters .tag.active { background: var(--gold-on-deep); color: #1b1408; }
+</style>
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.filters .tag');
+  buttons.forEach((b) => b.addEventListener('click', () => {
+    buttons.forEach((x) => x.classList.toggle('active', x === b));
+    const f = b.dataset.filter;
+    document.querySelectorAll<HTMLElement>('.gallery li').forEach((li) => { li.hidden = f !== 'all' && li.dataset.person !== f; });
+  }));
+</script>

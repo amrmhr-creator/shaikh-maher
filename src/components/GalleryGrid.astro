@@ -1,0 +1,105 @@
+---
+// شبكة صور مع عارض مكبّر (dialog). تُستخدم في صفحة مكتبة الصور وفي الصفحة الرئيسية.
+import type { CollectionEntry } from 'astro:content';
+import { u } from '../lib/site';
+interface Props { photos: CollectionEntry<'gallery'>[]; compact?: boolean }
+const { photos, compact = false } = Astro.props;
+---
+<ul class:list={['gallery', { compact }]}>
+  {photos.map((p) => (
+    <li data-person={p.data.person}>
+      <button type="button" class="shot" data-src={u(p.data.image)} data-caption={p.data.caption}>
+        <img src={u(p.data.image)} alt={p.data.caption} loading="lazy" />
+        <span class="cap">{p.data.caption}</span>
+      </button>
+    </li>
+  ))}
+</ul>
+<dialog class="viewer" aria-label="عرض الصورة">
+  <form method="dialog"><button class="close" aria-label="إغلاق">×</button></form>
+  <figure>
+    <img alt="" />
+    <figcaption></figcaption>
+  </figure>
+</dialog>
+<style>
+  .gallery {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 3 260px;
+    column-gap: 16px;
+  }
+  .gallery.compact { columns: 4 200px; }
+  .gallery li { break-inside: avoid; margin-bottom: 16px; }
+  .gallery li[hidden] { display: none; }
+  .shot {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface-2);
+    cursor: zoom-in;
+    box-shadow: var(--shadow);
+  }
+  .shot img { width: 100%; transition: transform 0.3s; }
+  .shot:hover img { transform: scale(1.04); }
+  .cap {
+    position: absolute;
+    inset: auto 0 0;
+    padding: 28px 14px 10px;
+    background: linear-gradient(transparent, rgb(8 30 24 / 85%));
+    color: #f6efdc;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: start;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .shot:hover .cap, .shot:focus-visible .cap { opacity: 1; }
+  @media (hover: none) { .cap { opacity: 1; } }
+
+  .viewer {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    max-width: min(92vw, 1100px);
+    max-height: 92vh;
+  }
+  .viewer::backdrop { background: rgb(6 20 16 / 88%); }
+  .viewer figure { margin: 0; text-align: center; }
+  .viewer img { max-height: 80vh; width: auto; margin-inline: auto; border-radius: 10px; }
+  .viewer figcaption { color: #f6efdc; margin-top: 12px; font-size: 1rem; }
+  .close {
+    position: fixed;
+    top: 16px;
+    inset-inline-end: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgb(216 180 106 / 60%);
+    background: rgb(0 0 0 / 30%);
+    color: #f6efdc;
+    font-size: 1.6rem;
+    cursor: pointer;
+  }
+</style>
+<script>
+  for (const grid of document.querySelectorAll('.gallery')) {
+    const dlg = grid.nextElementSibling as HTMLDialogElement;
+    const img = dlg.querySelector('img')!;
+    const cap = dlg.querySelector('figcaption')!;
+    grid.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.shot');
+      if (!btn) return;
+      img.src = btn.dataset.src!;
+      img.alt = btn.dataset.caption!;
+      cap.textContent = btn.dataset.caption!;
+      dlg.showModal();
+    });
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  }
+</script>

@@ -176,7 +176,7 @@ p {
 }
 .nav a {
   display: block;
-  padding: 7px 13px;
+  padding: 7px 11px;
   border-radius: 999px;
   text-decoration: none;
   color: var(--on-deep);
@@ -193,7 +193,7 @@ p {
 .nav-toggle {
   display: none;
 }
-@media (max-width: 900px) {
+@media (max-width: 1180px) {
   .nav-toggle {
     display: inline-flex;
     margin-inline-start: auto;

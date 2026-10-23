@@ -13,10 +13,12 @@ export function u(path = '/'): string {
 
 export const NAV = [
   { href: '/', label: 'الرئيسية' },
+  { href: '/about/', label: 'عن الشيخ' },
+  { href: '/fathallah/', label: 'الشيخ فتح الله' },
   { href: '/lessons/', label: 'الدروس الصوتية' },
   { href: '/books/', label: 'الكتب والرسائل' },
   { href: '/fawaid/', label: 'الفوائد' },
-  { href: '/about/', label: 'عن الشيخ' },
+  { href: '/gallery/', label: 'مكتبة الصور' },
   { href: '/search/', label: 'بحث' },
 ];
 
