@@ -1,0 +1,46 @@
+name: Preview probe
+
+# يفتح صفحات الموقع التجريبي على Hostinger (المسجل في .hostinger/site.json) ويعرض حالتها.
+on:
+  push:
+    branches-ignore: [gh-pages]
+    paths: ['.hostinger/**', '.github/workflows/preview.yml', 'scripts/pdf-reader-check.mjs']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe pages
+        run: |
+          D="https://$(jq -r .domain .hostinger/site.json)"
+          for p in / /lessons/01/ /books/rasayel/ /gallery/ /about/ /fathallah/ /admin/login/ /media/images/sheikh-cutout.webp; do
+            code=$(curl -s -o page.html -w '%{http_code}' --max-time 60 "$D$p")
+            title=$(grep -o '<title>[^<]*' page.html | head -1 | sed 's/<title>//')
+            echo "$code $p  $title"
+          done
+          f=$(curl -s --max-time 60 "$D/fathallah/")
+          echo "fathallah: chapters=$(echo "$f" | grep -c 'class="chapter"') rafiq=$(echo "$f" | grep -c 'ورفيق الشيخ ماهر') wafaa=$(echo "$f" | grep -c 'مقدمة الوفاء')"
+          a=$(curl -s --max-time 60 "$D/about/"); echo "about: sudan=$(echo "$a" | grep -c 'عطبرة، السودان') asamiya=$(echo "$a" | grep -c 'عصامية الروح') note=$(echo "$a" | grep -c 'class="note')"
+          echo "books: thumbs=$(curl -s --max-time 60 "$D/books/rasayel/" | grep -o 'media/books/rasayel/[0-9]*.webp' | sort -u | wc -l) series-btn=$(curl -s --max-time 60 "$D/books/" | grep -c 'تصفح تفاصيل السلسلة')"
+          echo "pdf range: $(curl -s -o /dev/null -w '%{http_code} %{size_download}B %{time_total}s' -r 0-1048575 --max-time 60 "$D/pdf/?src=https%3A%2F%2Fmedia.shaikhmaher.com%2F2026%2F07%2F1.pdf")"
+          curl -s -D - -o /dev/null -r 0-1023 --max-time 60 "$D/pdf/?src=https%3A%2F%2Fmedia.shaikhmaher.com%2F2026%2F07%2F1.pdf" | grep -iE '^(HTTP|content-|accept-ranges)'
+          echo "hero photo on /: $(curl -s --max-time 60 "$D/" | grep -c sheikh-cutout.webp)"
+          echo '--- first lines of /'
+          curl -s --max-time 60 "$D/" | head -c 1500
+      - name: Open a book chapter in a real browser
+        run: |
+          D="https://$(jq -r .domain .hostinger/site.json)"
+          npm i --no-save --no-package-lock playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          node scripts/pdf-reader-check.mjs "$D/books/rasayel/"
+          node scripts/pdf-reader-check.mjs "$D/books/dros/"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pdf-reader
+          path: pdf-reader.png

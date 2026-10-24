@@ -9,10 +9,12 @@ const clamp = preview && preview < total ? preview : 0;
 let i = 0;
 ---
 <figure class:list={['poem', { clamped: clamp }]} style={clamp ? `--shown:${clamp}` : undefined}>
-  <div class="poem-head">
-    {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-    {showTitle && <h2 class="poem-title">{poem.title}</h2>}
-  </div>
+  {(eyebrow || showTitle) && (
+    <div class="poem-head">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      {showTitle && <h2 class="poem-title">{poem.title}</h2>}
+    </div>
+  )}
   {poem.sections.map((s) => (
     <div class="poem-section">
       {s.heading && <p class="poem-heading">{s.heading}</p>}

@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import GalleryGrid from '../../components/GalleryGrid.astro';
@@ -12,7 +12,7 @@ const FILTERS = [
   { key: 'other', label: 'أخرى' },
 ].filter((f) => photos.some((p) => p.data.person === f.key));
 ---
-<Base title="مكتبة الصور" description="صور فضيلة الشيخ ماهر إسماعيل جاهين وتلميذه الشيخ فتح الله إمام حمودة.">
+<Base title="مكتبة الصور" description="صور فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله.">
   <PageHero eyebrow="شاهد" title="مكتبة الصور" lead="صور الشيخ رحمه الله، الفردية والجماعية.">
     {FILTERS.length > 1 && (
       <div class="filters" role="group" aria-label="تصفية الصور">

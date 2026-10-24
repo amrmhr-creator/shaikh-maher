@@ -155,6 +155,20 @@ p {
   font-weight: 700;
   flex: none;
 }
+.brand-logo {
+  display: block;
+  height: 84px;
+  width: auto;
+  max-width: 150px;
+  margin-block: 6px;
+  object-fit: contain;
+  flex: none;
+}
+@media (min-width: 700px) {
+  .brand-logo {
+    height: 112px;
+  }
+}
 .brand-text strong {
   display: block;
   font-family: var(--font-display);
@@ -329,6 +343,13 @@ main {
   gap: 18px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
 }
+/* بطاقات الفوائد العمودية (ريلز) */
+.reels {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(46%, 210px), 1fr));
+}
+@media (min-width: 900px) { .reels { grid-template-columns: repeat(4, 1fr); } }
 
 .card {
   position: relative;
@@ -500,3 +521,61 @@ video {
   color: var(--accent);
 }
 .prose h3 { margin-top: 1.3em; font-size: 1.15rem; }
+
+/* ---------- فصول السيرة (تعريف بالشيخ وصفحة الشيخ فتح الله) ---------- */
+/* الفصول: عمود في المنتصف وخط رفيع على اليمين يصل بين العناوين */
+.chapters {
+  --gutter: 44px;
+  position: relative;
+  max-width: 860px;
+  margin-inline: auto;
+  padding-inline-start: var(--gutter);
+}
+.chapters::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 10px;
+  top: 14px;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(var(--gold), var(--gold-soft) 85%, transparent);
+}
+@media (max-width: 640px) { .chapters { --gutter: 30px; } .chapters::before { inset-inline-start: 6px; } }
+.chapter { position: relative; }
+.chapter + .chapter { margin-top: 64px; }
+.mark {
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--gutter));
+  top: .55em;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--gold);
+  box-shadow: inset 0 0 0 4px var(--bg), inset 0 0 0 11px var(--gold);
+}
+@media (max-width: 640px) { .mark { width: 14px; height: 14px; box-shadow: inset 0 0 0 3px var(--bg), inset 0 0 0 7px var(--gold); } }
+.chapter h2 { margin: 0 0 18px; line-height: 1.6; color: var(--accent); }
+.chapter > p { color: var(--text); font-size: 1.08rem; line-height: 2; margin: 0 0 16px; }
+.chapter blockquote {
+  margin: 20px 0;
+  padding: 16px 22px;
+  border-inline-start: 3px solid var(--gold);
+  background: var(--surface);
+  border-radius: 0 12px 12px 0;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 2;
+}
+.chapter blockquote p { margin: 0; }
+
+.subcard {
+  margin: 28px 0 16px;
+  padding: 24px 24px 20px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--gold-soft);
+  border-inline-start: 4px solid var(--gold);
+}
+.subhead { margin: 0 0 10px; font-size: 1.3rem; line-height: 1.6; color: var(--text); }
+.subcard > p { margin: 0 0 12px; line-height: 2; }

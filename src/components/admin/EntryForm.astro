@@ -1,0 +1,49 @@
+---
+import Field from './Field.astro';
+import type { Field as FieldDef, Option } from '../../lib/admin';
+
+interface Props {
+  fields: FieldDef[];
+  data: Record<string, any>;
+  refs?: Record<string, { label: string; options: Option[] }>;
+  submit: string;
+}
+const { fields, data, refs, submit } = Astro.props;
+---
+<form method="post" enctype="multipart/form-data" class="entry-form">
+  {fields.map((f) => <Field field={f} data={data} refs={refs} />)}
+  <div class="actions sticky">
+    <button class="btn" name="_action" value="save">{submit}</button>
+    <slot name="actions" />
+  </div>
+</form>
+<script>
+  // إضافة وحذف وترتيب عناصر القوائم (مثل فصول الكتاب).
+  let counter = Date.now();
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest('button');
+    if (!btn) return;
+    const list = btn.closest<HTMLElement>('[data-list]');
+    if (btn.hasAttribute('data-add') && list) {
+      const tpl = list.querySelector(':scope > template') as HTMLTemplateElement;
+      const html = tpl.innerHTML.replaceAll('__i__', String(counter++));
+      list.querySelector(':scope > .items')!.insertAdjacentHTML('beforeend', html);
+    } else if (btn.hasAttribute('data-remove')) {
+      if (confirm('حذف هذا العنصر؟')) btn.closest('.item')?.remove();
+    } else if (btn.dataset.move) {
+      const item = btn.closest('.item')!;
+      if (btn.dataset.move === '-1') item.previousElementSibling?.before(item);
+      else item.nextElementSibling?.after(item);
+    }
+  });
+  // تنبيه قبل مغادرة صفحة فيها تعديلات غير محفوظة.
+  for (const form of document.querySelectorAll<HTMLFormElement>('form.entry-form')) {
+    let dirty = false;
+    form.addEventListener('input', () => (dirty = true));
+    form.addEventListener('submit', () => {
+      dirty = false;
+      form.querySelectorAll<HTMLButtonElement>('button[name=_action]').forEach((b) => (b.dataset.busy = '1'));
+    });
+    addEventListener('beforeunload', (e) => { if (dirty) e.preventDefault(); });
+  }
+</script>

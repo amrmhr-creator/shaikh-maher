@@ -26,22 +26,21 @@ const { src, id, title, subtitle } = Astro.props;
   </div>
 
   <div class="ap-controls">
-    <button class="ap-btn ap-back" type="button" aria-label="تأخير ١٥ ثانية" title="تأخير ١٥ ثانية">
+    <button class="ap-btn ap-back" type="button" aria-label="تأخير ١٠ ثوانٍ" title="تأخير ١٠ ثوانٍ">
       <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <path d="M16 6a10 10 0 1 1-9.5 6.9" /><path d="M6 6v6h6" />
-        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">15</text>
+        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">10</text>
       </svg>
       <span>تأخير</span>
     </button>
-    <button class="ap-btn ap-speed" type="button" aria-label="سرعة التشغيل" title="سرعة التشغيل"><b>١×</b><span>السرعة</span></button>
-    <button class="ap-btn ap-fwd" type="button" aria-label="تقديم ٣٠ ثانية" title="تقديم ٣٠ ثانية">
+    <button class="ap-btn ap-fwd" type="button" aria-label="تقديم ١٠ ثوانٍ" title="تقديم ١٠ ثوانٍ">
       <svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
         <path d="M16 6a10 10 0 1 0 9.5 6.9" /><path d="M26 6v6h-6" />
-        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">30</text>
+        <text x="16" y="20" text-anchor="middle" font-size="9" font-weight="700" fill="currentColor" stroke="none" font-family="system-ui">10</text>
       </svg>
       <span>تقديم</span>
     </button>
-    <a class="ap-btn" href={src} download aria-label="تحميل الدرس" title="تحميل الدرس"><Icon name="download" size={24} /><span>تحميل</span></a>
+    <a class="ap-btn" href={src} download aria-label="تحميل التسجيل" title="تحميل التسجيل"><Icon name="download" size={24} /><span>تحميل</span></a>
   </div>
 </div>
 
@@ -113,7 +112,7 @@ const { src, id, title, subtitle } = Astro.props;
 
   .ap-controls {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     border-top: 1px solid var(--line);
     padding-top: 14px;
@@ -134,13 +133,6 @@ const { src, id, title, subtitle } = Astro.props;
   }
   .ap-btn:hover { background: var(--surface-2); color: var(--accent); }
   .ap-btn span { color: var(--muted); }
-  .ap-speed b {
-    height: 30px;
-    display: grid;
-    place-items: center;
-    font-size: 1.05rem;
-    color: var(--accent);
-  }
 </style>
 
 <script>
@@ -154,7 +146,6 @@ const { src, id, title, subtitle } = Astro.props;
     const s = String(sec % 60).padStart(2, '0');
     return ar(h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`);
   };
-  const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
 
   for (const root of document.querySelectorAll<HTMLElement>('.ap')) {
     const audio = root.querySelector('audio')!;
@@ -162,7 +153,6 @@ const { src, id, title, subtitle } = Astro.props;
     const seek = root.querySelector<HTMLInputElement>('.ap-seek')!;
     const cur = root.querySelector('.ap-cur')!;
     const dur = root.querySelector('.ap-dur')!;
-    const speed = root.querySelector<HTMLButtonElement>('.ap-speed')!;
     const resume = root.querySelector<HTMLElement>('.ap-resume')!;
     const key = `pos:${root.dataset.audioId}`;
     const t = Number(new URLSearchParams(location.search).get('t'));
@@ -192,8 +182,8 @@ const { src, id, title, subtitle } = Astro.props;
     audio.addEventListener('pause', () => { root.classList.remove('playing'); play.setAttribute('aria-label', 'تشغيل'); });
 
     const jump = (d: number) => { audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + d)); paint(); };
-    root.querySelector('.ap-back')!.addEventListener('click', () => jump(-15));
-    root.querySelector('.ap-fwd')!.addEventListener('click', () => jump(30));
+    root.querySelector('.ap-back')!.addEventListener('click', () => jump(-10));
+    root.querySelector('.ap-fwd')!.addEventListener('click', () => jump(10));
 
     seek.addEventListener('input', () => {
       dragging = true;
@@ -201,12 +191,6 @@ const { src, id, title, subtitle } = Astro.props;
       seek.style.setProperty('--p', `${(Number(seek.value) / (audio.duration || 1)) * 100}%`);
     });
     seek.addEventListener('change', () => { audio.currentTime = Number(seek.value); dragging = false; });
-
-    speed.addEventListener('click', () => {
-      const next = SPEEDS[(SPEEDS.indexOf(audio.playbackRate) + 1) % SPEEDS.length];
-      audio.playbackRate = next;
-      speed.querySelector('b')!.textContent = `${ar(String(next))}×`;
-    });
 
     let last = 0;
     audio.addEventListener('timeupdate', () => {

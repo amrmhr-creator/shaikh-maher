@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import FaidaCard from '../../components/FaidaCard.astro';
@@ -8,15 +8,15 @@ import { TOPICS } from '../../lib/topics';
 
 const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
 ---
-<Base title="الفوائد" description="فوائد قصيرة مستخرجة من دروس الشيخ ماهر جاهين وكتبه، مربوطة بمصادرها.">
-  <PageHero eyebrow="تأمل" title="الفوائد" lead="مقتطفات قصيرة من كلام الشيخ، كل فائدة مربوطة بمصدرها: الدرس والدقيقة، أو الكتاب والفصل، لتسمعها أو تقرأها في سياقها الكامل.">
+<Base title="فوائد مختارة" description="فوائد قصيرة مستخرجة من دروس الشيخ ماهر جاهين وكتبه، مربوطة بمصادرها.">
+  <PageHero eyebrow="تأمل" title="فوائد مختارة" lead="مقاطع قصيرة من كلام الشيخ، كل فائدة مربوطة بمصدرها لتسمعها في سياقها الكامل.">
     <ul class="tags">
       {Object.entries(TOPICS).map(([slug, label]) => <li><a class="tag" href={u(`/topics/${slug}/`)}>{label}</a></li>)}
     </ul>
   </PageHero>
   <div class="wrap">
     {fawaid.length
-      ? <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+      ? <div class="reels">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
       : <p class="empty">لا توجد فوائد منشورة بعد.</p>}
   </div>
 </Base>

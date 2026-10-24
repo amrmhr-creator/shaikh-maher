@@ -1,0 +1,56 @@
+name: Check
+
+# يبني الموقع ويشغله مع قاعدة MySQL حقيقية، ثم يجرب الصفحات ولوحة التحكم.
+on:
+  push:
+    branches-ignore: [gh-pages]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: shaikh
+          MYSQL_USER: shaikh
+          MYSQL_PASSWORD: shaikh
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: shaikh
+      DB_USER: shaikh
+      DB_PASSWORD: shaikh
+      SESSION_SECRET: ci-secret
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ci-password-123
+      UPLOAD_DIR: /tmp/uploads
+      HOST: 127.0.0.1
+      PORT: 4321
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - name: Start server
+        run: |
+          nohup npm start > server.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf -o /dev/null http://127.0.0.1:4321/ && exit 0; sleep 1; done
+          cat server.log; exit 1
+      - run: bash scripts/smoke-test.sh http://127.0.0.1:4321
+      - name: Server log
+        if: always()
+        run: |
+          cat server.log || true
+          ls -laR /tmp/uploads || true

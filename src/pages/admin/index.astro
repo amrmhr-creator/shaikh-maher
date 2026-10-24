@@ -1,0 +1,29 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { ADMIN } from '../../lib/admin';
+import { getCollection } from '../../lib/content';
+import { COLLECTIONS } from '../../lib/schemas';
+import { u, ar } from '../../lib/site';
+
+const counts = await Promise.all(COLLECTIONS.map(async (c) => [c, (await getCollection(c)).length] as const));
+const drafts = (await getCollection('fawaid')).filter((f) => f.data.status !== 'published').length;
+---
+<Admin title="الرئيسية">
+  <h1>أهلًا {Astro.locals.user?.username}</h1>
+  <p class="muted">من هنا تضيف الدروس والفوائد والكتب والصور، وأي تعديل يظهر على الموقع خلال دقيقة على الأكثر.</p>
+  <div class="tiles">
+    {counts.map(([c, n]) => (
+      <a class="card tile" href={u(`/admin/${c}/`)}>
+        <strong>{ar(n)}</strong>
+        <span>{ADMIN[c].label}</span>
+      </a>
+    ))}
+  </div>
+  <div class="actions">
+    <a class="btn" href={u('/admin/gallery/upload/')}>+ رفع صور لمكتبة الصور</a>
+    <a class="btn ghost" href={u('/admin/fawaid/new/')}>+ فائدة جديدة</a>
+    <a class="btn ghost" href={u('/admin/lessons/new/')}>+ درس جديد</a>
+    <a class="btn ghost" href={u('/admin/books/new/')}>+ كتاب جديد</a>
+  </div>
+  {drafts > 0 && <p class="alert">عندك {ar(drafts)} فوائد غير منشورة بعد. <a href={u('/admin/fawaid/')}>راجعها</a></p>}
+</Admin>

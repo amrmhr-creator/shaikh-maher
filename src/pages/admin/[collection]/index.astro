@@ -1,0 +1,50 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import { ADMIN, isCollection } from '../../../lib/admin';
+import { getCollection } from '../../../lib/content';
+import { u, ar } from '../../../lib/site';
+
+const { collection } = Astro.params;
+if (!isCollection(collection)) return Astro.rewrite('/404/');
+const conf = ADMIN[collection];
+const entries = (await getCollection(collection)).sort(conf.sort);
+const notice = Astro.url.searchParams.get('done');
+const STATUS: Record<string, string> = { draft: 'مسودة', review: 'قيد المراجعة', published: 'منشورة' };
+const img = (v: string) => (/^(https?:)?\/\//.test(v) ? v : u(v));
+---
+<Admin title={conf.label}>
+  <div class="head">
+    <h1>{conf.label} <small class="muted">({ar(entries.length)})</small></h1>
+    <div class="actions">
+      {collection === 'gallery' && <a class="btn" href={u('/admin/gallery/upload/')}>+ رفع صور</a>}
+      <a class:list={['btn', { ghost: collection === 'gallery' }]} href={u(`/admin/${collection}/new/`)}>+ {conf.newLabel}</a>
+    </div>
+  </div>
+  {notice === 'deleted' && <p class="alert ok">تم الحذف.</p>}
+  {notice === 'uploaded' && <p class="alert ok">تم رفع الصور. يمكنك تعديل التعليق على كل صورة من هنا.</p>}
+
+  {entries.length === 0 && <p class="muted">لا يوجد شيء بعد.</p>}
+
+  {collection === 'gallery' ? (
+    <ul class="photo-grid">
+      {entries.map((e: any) => (
+        <li>
+          <a href={u(`/admin/gallery/${encodeURIComponent(e.id)}/`)}>
+            <img src={img(e.data.image)} alt="" loading="lazy" />
+            <span>{e.data.caption}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <ul class="rows">
+      {entries.map((e: any) => (
+        <li class="card row">
+          <a href={u(`/admin/${collection}/${encodeURIComponent(e.id)}/`)}>{conf.title(e)}</a>
+          {collection === 'fawaid' && <span class:list={['badge', e.data.status]}>{STATUS[e.data.status]}</span>}
+          <a class="muted small" href={u(conf.href(e.id))} target="_blank">على الموقع ↗</a>
+        </li>
+      ))}
+    </ul>
+  )}
+</Admin>
