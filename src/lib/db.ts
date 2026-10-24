@@ -60,8 +60,25 @@ async function init(p: mysql.Pool) {
     name VARCHAR(64) PRIMARY KEY,
     value TEXT NULL
   ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  const fresh = !(await getMeta(p, 'seeded'));
   await seedContent(p);
+  await numberGallery(p, fresh);
   await bootstrapAdmin(p);
+}
+
+// تعليقات الصور المرفوعة كانت أسماء ملفات (مثل FB IMG 1451504638128)، فطُلب ترقيم كل الصور
+// بالترتيب المعروض في مكتبة الصور (١ لأول صورة) مرة واحدة، لحين كتابة تعليقات حقيقية من اللوحة.
+async function numberGallery(p: mysql.Pool, fresh: boolean) {
+  if (await getMeta(p, 'gallery_numbered')) return;
+  if (fresh) return void (await setMeta(p, 'gallery_numbered', 'fresh install'));
+  const [rows] = await p.query<mysql.RowDataPacket[]>(`SELECT id, data FROM entries WHERE collection = 'gallery'`);
+  const photos = rows
+    .map((r) => ({ id: r.id as string, order: Number((typeof r.data === 'string' ? JSON.parse(r.data) : r.data).order ?? 100) }))
+    .sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
+  for (const [i, ph] of photos.entries()) {
+    await p.query(`UPDATE entries SET data = JSON_SET(data, '$.caption', ?) WHERE collection = 'gallery' AND id = ?`, [String(i + 1), ph.id]);
+  }
+  await setMeta(p, 'gallery_numbered', new Date().toISOString());
 }
 
 // المحتوى الأولي: ملفات src/content/*.md تُضم داخل البناء وتُنقل إلى القاعدة.
