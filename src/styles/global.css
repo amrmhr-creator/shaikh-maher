@@ -157,19 +157,15 @@ p {
 }
 .brand-logo {
   display: block;
-  height: 50px;
+  height: 84px;
   width: auto;
-  max-width: 220px;
+  max-width: 150px;
+  margin-block: 6px;
   object-fit: contain;
   flex: none;
 }
-.logo-only .brand-logo {
-  height: 84px;
-  max-width: 150px;
-  margin-block: 6px;
-}
 @media (min-width: 700px) {
-  .logo-only .brand-logo {
+  .brand-logo {
     height: 112px;
   }
 }
