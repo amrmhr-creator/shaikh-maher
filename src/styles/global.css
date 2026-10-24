@@ -164,13 +164,13 @@ p {
   flex: none;
 }
 .logo-only .brand-logo {
-  height: 66px;
-  max-width: 120px;
+  height: 84px;
+  max-width: 150px;
   margin-block: 6px;
 }
 @media (min-width: 700px) {
   .logo-only .brand-logo {
-    height: 88px;
+    height: 112px;
   }
 }
 .brand-text strong {
