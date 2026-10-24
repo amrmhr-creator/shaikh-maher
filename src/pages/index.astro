@@ -146,31 +146,39 @@ const sections = [
 </Base>
 
 <style>
-  .hero { position: relative; overflow: hidden; padding-top: 48px; }
-  .hero-inner { display: grid; gap: 8px; align-items: end; }
-  .hero-inner > * { min-width: 0; }
-  .hero-text { text-align: center; padding-bottom: 88px; }
-  .hero-figure {
-    position: relative;
-    margin: 0 auto;
-    width: min(100%, 340px);
-    order: -1;
-  }
-  /* هالة ذهبية خفيفة خلف صورة الشيخ */
-  .hero-figure::before {
+  .hero { position: relative; overflow: hidden; padding-top: 48px; isolation: isolate; }
+  /* الزخرفة تبقى خافتة على اليمين وتذوب ناحية الشمال في ظل هادئ تقف فيه صورة الشيخ */
+  .hero::before {
     content: '';
     position: absolute;
-    inset: 12% 6% 0;
-    border-radius: 50% 50% 0 0;
-    background: radial-gradient(closest-side, rgb(216 180 106 / 30%), transparent);
+    inset: 0;
     z-index: -1;
+    background:
+      radial-gradient(60% 75% at 22% 45%, rgb(216 180 106 / 16%), transparent 70%),
+      linear-gradient(to left, transparent 30%, var(--deep) 75%);
   }
-  .hero-figure img { display: block; width: 100%; height: auto; filter: drop-shadow(0 10px 30px rgb(0 0 0 / 35%)); }
+  .hero-inner { display: grid; gap: 0; align-items: end; }
+  .hero-inner > * { min-width: 0; }
+  .hero-text { text-align: center; padding-bottom: 88px; position: relative; }
+  .hero-figure {
+    margin: 0 auto -8px;
+    width: min(100%, 420px);
+    order: -1;
+  }
+  /* حواف الصورة تذوب في الخلفية بدل القطع الحاد */
+  .hero-figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: .92;
+    -webkit-mask-image: radial-gradient(ellipse 62% 72% at 50% 42%, #000 58%, transparent 100%);
+    mask-image: radial-gradient(ellipse 62% 72% at 50% 42%, #000 58%, transparent 100%);
+  }
   @media (min-width: 880px) {
-    .hero { padding-top: 56px; }
-    .hero-inner { grid-template-columns: 1.15fr 1fr; gap: 32px; }
+    .hero { padding-top: 32px; }
+    .hero-inner { grid-template-columns: 1.2fr 1fr; gap: 0; }
     .hero-text { text-align: start; align-self: center; padding-bottom: 100px; }
-    .hero-figure { order: 0; width: min(100%, 500px); margin: 0; justify-self: end; }
+    .hero-figure { order: 0; width: min(125%, 680px); margin: 0 0 0 -18%; justify-self: end; }
   }
   .hero h1 { display: grid; gap: .1em; color: var(--on-deep); }
   @media (max-width: 879px) { .hero h1 { justify-items: center; } }
