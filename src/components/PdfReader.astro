@@ -164,23 +164,43 @@
         lib.GlobalWorkerOptions.workerSrc = `${PDFJS}pdf.worker.min.mjs`;
         doc?.destroy();
         doc = undefined;
-        // يقرأ الملف على أجزاء (نصف ميجابايت) حسب الصفحات المعروضة فقط.
-        const task = lib.getDocument({
-          url: fetchUrl(src),
+        // يقرأ الملف على أجزاء حسب الصفحات المعروضة فقط، بطلبات Range نرسلها بأنفسنا،
+        // لأن خادم الاستضافة يحذف ترويسة Accept-Ranges فلا تكتشف pdf.js دعم الأجزاء وحدها.
+        const url = fetchUrl(src);
+        const CHUNK = 524288;
+        const part = async (begin: number, end: number) => {
+          const r = await fetch(url, { headers: { Range: `bytes=${begin}-${end - 1}` } });
+          if (!r.ok) throw new Error(String(r.status));
+          return r;
+        };
+        const head = await part(0, CHUNK);
+        const total = Number(head.headers.get('content-range')?.split('/')[1]);
+        const first = new Uint8Array(await head.arrayBuffer());
+        const common = {
           disableAutoFetch: true,
-          disableStream: true,
-          rangeChunkSize: 524288,
+          rangeChunkSize: CHUNK,
           cMapUrl: `${PDFJS_ROOT}cmaps/`,
           cMapPacked: true,
           standardFontDataUrl: `${PDFJS_ROOT}standard_fonts/`,
-        });
-        task.onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
-          if (total && !doc) say(`جارٍ فتح الملف… ${ar(Math.min(99, Math.round((loaded / total) * 100)))}٪`);
         };
+        let task;
+        if (head.status === 206 && total > first.length) {
+          const transport = new lib.PDFDataRangeTransport(total, first);
+          transport.requestDataRange = (begin: number, end: number) => {
+            part(begin, end)
+              .then((r) => r.arrayBuffer())
+              .then((buf) => transport.onDataRange(begin, new Uint8Array(buf)))
+              .catch(() => {});
+          };
+          task = lib.getDocument({ ...common, range: transport, length: total });
+        } else {
+          // الخادم أعاد الملف كاملًا (ملف صغير أو بلا دعم للأجزاء)
+          task = lib.getDocument({ ...common, data: first });
+        }
         doc = await task.promise;
-        const first = (await doc.getPage(1)).getViewport({ scale: 1 });
+        const vp = (await doc.getPage(1)).getViewport({ scale: 1 });
         say('');
-        layout(first.width / first.height);
+        layout(vp.width / vp.height);
       } catch {
         say('تعذر فتح الملف هنا. يمكنك فتحه في نافذة جديدة أو تحميله.', true);
       }

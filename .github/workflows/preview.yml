@@ -4,7 +4,7 @@ name: Preview probe
 on:
   push:
     branches-ignore: [gh-pages]
-    paths: ['.hostinger/**', '.github/workflows/preview.yml']
+    paths: ['.hostinger/**', '.github/workflows/preview.yml', 'scripts/pdf-reader-check.mjs']
   workflow_dispatch:
 
 permissions:
@@ -32,3 +32,15 @@ jobs:
           echo "hero photo on /: $(curl -s --max-time 60 "$D/" | grep -c sheikh-cutout.webp)"
           echo '--- first lines of /'
           curl -s --max-time 60 "$D/" | head -c 1500
+      - name: Open a book chapter in a real browser
+        run: |
+          D="https://$(jq -r .domain .hostinger/site.json)"
+          npm i --no-save --no-package-lock playwright@1.48.2 >/dev/null
+          npx playwright install --with-deps chromium >/dev/null
+          node scripts/pdf-reader-check.mjs "$D/books/rasayel/"
+          node scripts/pdf-reader-check.mjs "$D/books/dros/"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pdf-reader
+          path: pdf-reader.png
