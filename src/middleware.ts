@@ -8,9 +8,30 @@ const ADMIN = `${base}/admin`;
 // الملفات المرفوعة تُخدم هنا قبل التوجيه، لأن مسارات الملفات (بامتداد) لا تصل إلى صفحات Astro.
 const LOCAL_UPLOADS = UPLOAD_URL.startsWith('/') ? `${base}${UPLOAD_URL}` : undefined;
 
+// روابط موقع الورد بريس القديم تُحوَّل لمقابلها هنا حتى لا تنكسر روابط جوجل والسوشيال ميديا.
+// نسخة الورد بريس نفسها محفوظة على old.shaikhmaher.com.
+const LEGACY_PAGES: Record<string, string> = {
+  '/shaikhfathalla': '/fathallah/',
+  '/videos': '/fawaid/',
+  '/elementor-page-4011': '/books/rasayel/',
+};
+
+function legacyRedirect(path: string): string | undefined {
+  if (path.startsWith('/wp-content/uploads/')) {
+    return `https://media.shaikhmaher.com/${path.slice('/wp-content/uploads/'.length)}`;
+  }
+  if (path === '/wp-login.php' || path === '/wp-admin' || path.startsWith('/wp-admin/')) {
+    return `https://old.shaikhmaher.com${path}`;
+  }
+  const page = LEGACY_PAGES[path.replace(/\/$/, '')];
+  return page && `${base}${page}`;
+}
+
 // كل صفحات /admin تحتاج تسجيل دخول، ما عدا صفحة الدخول نفسها.
 export const onRequest = defineMiddleware(async (ctx, next) => {
   const path = ctx.url.pathname;
+  const legacy = legacyRedirect(path);
+  if (legacy) return ctx.redirect(legacy + ctx.url.search, 301);
   if (LOCAL_UPLOADS && path.startsWith(LOCAL_UPLOADS) && ['GET', 'HEAD'].includes(ctx.request.method)) {
     return serveUpload(ctx.request, path.slice(LOCAL_UPLOADS.length));
   }
