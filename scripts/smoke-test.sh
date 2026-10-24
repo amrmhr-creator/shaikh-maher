@@ -102,6 +102,15 @@ req 200 "$B/books/"; has 'كتاب تجريبي'
 bid=$(grep -o '/books/[^/"]*/' "$OUT" | grep -v -e rasayel -e dros | grep -v '^/books/$' | head -1)
 req 200 "$B$bid"; has 'الفصل الأول'; has 'https://media.shaikhmaher.com/b/2.pdf'
 
+echo '== site logo from settings'
+req 200 "$B/admin/settings/"; has 'لوجو الموقع'
+post 200 -F '_action=logo' -F "logo=@$T/test.png;type=image/png" "$B/admin/settings/"; has 'تم حفظ اللوجو'
+req 200 "$B/"; has 'class="brand-logo"'; has '/uploads/site/'; has 'brand-text'
+post 200 -F '_action=logo' -F 'logo_only=on' "$B/admin/settings/"
+req 200 "$B/"; has 'class="brand-logo"'; lacks 'brand-text'
+post 200 -F '_action=remove-logo' "$B/admin/settings/"
+req 200 "$B/"; lacks 'brand-logo'; has 'brand-mark'
+
 echo '== account + logout'
 post 200 -F '_action=add' -F 'username=editor' -F 'password=editor-pass-1' "$B/admin/account/"; has 'editor'
 post 303 -d '' "$B/admin/logout/"

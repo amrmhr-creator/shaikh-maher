@@ -12,6 +12,7 @@ const path = Astro.url.pathname;
 const nav = [
   { href: '/admin/', label: 'الرئيسية' },
   ...Object.entries(ADMIN).map(([name, c]) => ({ href: `/admin/${name}/`, label: c.label })),
+  { href: '/admin/settings/', label: 'إعدادات الموقع' },
   { href: '/admin/account/', label: 'الحساب' },
 ];
 const isCurrent = (href: string) => (href === '/admin/' ? path === u(href) : path.startsWith(u(href)));

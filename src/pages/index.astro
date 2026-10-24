@@ -18,10 +18,10 @@ const topicCount = (slug: TopicSlug) =>
   lessons.filter((l) => l.data.topics.includes(slug)).length + fawaid.filter((f) => f.data.topics.includes(slug)).length;
 
 const sections = [
+  { href: '/about/', icon: 'user', title: 'تعريف بالشيخ' },
   { href: '/lessons/', icon: 'headphones', title: 'تسجيلات المجالس' },
   { href: '/books/', icon: 'book', title: 'الكتب والرسائل' },
   { href: '/fawaid/', icon: 'quote', title: 'فوائد مختارة' },
-  { href: '/about/', icon: 'user', title: 'تعريف بالشيخ' },
   { href: '/fathallah/', icon: 'user', title: 'الشيخ فتح الله إمام حمودة' },
   { href: '/gallery/', icon: 'image', title: 'مكتبة الصور' },
 ] as const;

@@ -147,3 +147,22 @@ async function bootstrapAdmin(p: mysql.Pool) {
     await hashPassword(env.ADMIN_PASSWORD),
   ]);
 }
+
+// إعدادات الموقع العامة (مثل اللوجو) في جدول meta، مع ذاكرة قصيرة حتى لا تُقرأ القاعدة مع كل صفحة.
+const settings = new Map<string, { value: string | undefined; at: number }>();
+const SETTINGS_TTL = 60_000;
+
+export async function getSetting(name: string): Promise<string | undefined> {
+  const hit = settings.get(name);
+  if (hit && Date.now() - hit.at < SETTINGS_TTL) return hit.value;
+  const value = await getMeta(await db(), `setting:${name}`);
+  settings.set(name, { value: value || undefined, at: Date.now() });
+  return value || undefined;
+}
+
+export async function setSetting(name: string, value: string | undefined) {
+  const p = await db();
+  if (value) await setMeta(p, `setting:${name}`, value);
+  else await p.query(`DELETE FROM meta WHERE name = ?`, [`setting:${name}`]);
+  settings.set(name, { value, at: Date.now() });
+}

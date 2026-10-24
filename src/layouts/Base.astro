@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { getSetting } from '../lib/db';
 import { NAV, SITE_NAME, SITE_SHORT, SITE_TAGLINE, CONTACT_EMAIL, u, ar } from '../lib/site';
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 const { title, description = 'أرشيف تراث فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله: تسجيلات المجالس والكتب والرسائل والفوائد.' } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE_SHORT}` : SITE_NAME;
+const logo = await getSetting('logo').catch(() => undefined);
+const logoOnly = logo && (await getSetting('logo_only').catch(() => undefined)) === '1';
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => {
   const full = u(href);
@@ -35,8 +38,8 @@ const isCurrent = (href: string) => {
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href={u('/')}>
-          <span class="brand-mark" aria-hidden="true">م</span>
-          <span class="brand-text"><strong>{SITE_SHORT}</strong></span>
+          {logo ? <img class="brand-logo" src={logo} alt={logoOnly ? SITE_SHORT : ''} /> : <span class="brand-mark" aria-hidden="true">م</span>}
+          {!logoOnly && <span class="brand-text"><strong>{SITE_SHORT}</strong></span>}
         </a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">القائمة</button>
         <nav class="nav" id="nav" aria-label="القائمة الرئيسية">

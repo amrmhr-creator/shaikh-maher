@@ -1,0 +1,79 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { getSetting, setSetting } from '../../lib/db';
+import { isUpload, saveUpload } from '../../lib/uploads';
+
+let ok = '';
+let error = '';
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('_action');
+  try {
+    if (action === 'logo') {
+      const file = form.get('logo');
+      if (isUpload(file)) {
+        if (!file.type.startsWith('image/')) throw new Error('اللوجو لازم يكون صورة (png أو webp أو jpg).');
+        await setSetting('logo', await saveUpload(file, 'site'));
+      }
+      await setSetting('logo_only', form.get('logo_only') ? '1' : undefined);
+      ok = 'تم حفظ اللوجو.';
+    } else if (action === 'remove-logo') {
+      await setSetting('logo', undefined);
+      await setSetting('logo_only', undefined);
+      ok = 'تمت إزالة اللوجو، ورجع الشعار القديم.';
+    }
+  } catch (err) {
+    error = (err as Error).message;
+  }
+  if (error) Astro.response.status = 422;
+}
+const logo = await getSetting('logo');
+const logoOnly = (await getSetting('logo_only')) === '1';
+---
+<Admin title="إعدادات الموقع">
+  <h1>إعدادات الموقع</h1>
+  {ok && <p class="alert ok">{ok}</p>}
+  {error && <p class="alert error">{error}</p>}
+
+  <section class="card pad">
+    <h2>لوجو الموقع</h2>
+    <p class="muted">يظهر أعلى كل صفحات الموقع. الأفضل صورة png أو webp بخلفية شفافة، ويُعرض بارتفاع حوالي ٥٠ بكسل على خلفية خضراء داكنة.</p>
+    {logo ? (
+      <div class="logo-preview"><img src={logo} alt="اللوجو الحالي" /></div>
+    ) : (
+      <p class="muted">لا يوجد لوجو مرفوع، والموقع يعرض حرف «م» بجانب اسم الموقع.</p>
+    )}
+    <form method="post" enctype="multipart/form-data" class="narrow">
+      <input type="hidden" name="_action" value="logo" />
+      <div class="field">
+        <label for="logo">{logo ? 'تغيير اللوجو' : 'رفع لوجو'}</label>
+        <input id="logo" name="logo" type="file" accept="image/png,image/webp,image/jpeg,image/avif,image/gif" required={!logo} />
+      </div>
+      <div class="field">
+        <label><input type="checkbox" name="logo_only" checked={logoOnly} /> إخفاء اسم الموقع بجانب اللوجو (لو اللوجو فيه الاسم)</label>
+      </div>
+      <button class="btn">حفظ</button>
+    </form>
+    {logo && (
+      <form method="post" onsubmit="return confirm('إزالة اللوجو والرجوع للشعار القديم؟')">
+        <input type="hidden" name="_action" value="remove-logo" />
+        <button class="link danger">إزالة اللوجو</button>
+      </form>
+    )}
+  </section>
+</Admin>
+
+<style>
+  .logo-preview {
+    background: #0b2d25;
+    border-radius: 10px;
+    padding: 16px;
+    margin: 12px 0;
+    display: inline-block;
+  }
+  .logo-preview img {
+    display: block;
+    max-height: 64px;
+    max-width: 260px;
+  }
+</style>
