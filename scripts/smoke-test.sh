@@ -32,6 +32,9 @@ req 200 "$B/books/"; has 'تصفح تفاصيل السلسلة'
 code=$(curl -s -o "$OUT" -w '%{http_code}' -r 0-1023 "$B/pdf/?src=https%3A%2F%2Fmedia.shaikhmaher.com%2F2026%2F07%2F1-1.pdf")
 [ "$code" = 206 ] && [ "$(wc -c < "$OUT")" = 1024 ] || fail "pdf range -> $code, $(wc -c < "$OUT") bytes"
 pass=$((pass + 1))
+req 400 "$B/pdf/?src=https%3A%2F%2Fevil.example%2Fx.pdf"
+curl -s -D "$T/h" -o /dev/null "$B/" && grep -qi '^x-frame-options: SAMEORIGIN' "$T/h" && grep -qi '^x-content-type-options: nosniff' "$T/h" || fail 'security headers missing on /'
+pass=$((pass + 1))
 req 200 "$B/fawaid/"
 req 200 "$B/fawaid/haqiqat-alistighfar/"; has 'حقيقة الاستغفار'
 req 200 "$B/gallery/"; has 'sheikh-photo.webp'

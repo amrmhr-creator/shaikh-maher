@@ -23,6 +23,11 @@ export const GET: APIRoute = async ({ url, request }) => {
     signal: request.signal,
   }).catch(() => undefined);
   if (!res || !(res.ok || res.status === 416) || !res.body) return new Response('تعذر جلب الملف', { status: 502 });
+  // التحويلات مسموحة، لكن الملف النهائي لازم يكون من نفس النطاقات، حتى لا يُستخدم الرابط لجلب أي شيء آخر.
+  if (!HOSTS.has(new URL(res.url).hostname)) {
+    res.body.cancel().catch(() => {});
+    return new Response('رابط غير مسموح', { status: 400 });
+  }
   const headers = new Headers({
     'Content-Type': 'application/pdf',
     'Accept-Ranges': 'bytes',

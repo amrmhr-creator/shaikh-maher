@@ -75,24 +75,37 @@ export async function currentUser(cookies: AstroCookies): Promise<AdminUser | un
   }
 }
 
-// حد بسيط لمحاولات الدخول الخاطئة: 8 محاولات لكل عنوان كل 15 دقيقة.
+// حد بسيط لمحاولات الدخول الخاطئة: 8 محاولات لكل عنوان، و20 لكل اسم مستخدم، كل 15 دقيقة.
+// عدّاد اسم المستخدم مهم لأن عنوان الزائر يُقرأ من X-Forwarded-For، ويمكن تزويره لتغيير العنوان مع كل محاولة.
 const failures = new Map<string, { n: number; until: number }>();
 const WINDOW = 15 * 60 * 1000;
+const LIMITS = { ip: 8, user: 20 };
 
-export function loginBlocked(ip: string): boolean {
-  const f = failures.get(ip);
-  return Boolean(f && f.until > Date.now() && f.n >= 8);
+const keys = (ip: string, username: string) =>
+  [[`ip:${ip}`, LIMITS.ip], [`user:${username.toLowerCase()}`, LIMITS.user]] as const;
+
+export function loginBlocked(ip: string, username = ''): boolean {
+  return keys(ip, username).some(([key, limit]) => {
+    const f = failures.get(key);
+    return Boolean(f && f.until > Date.now() && f.n >= limit);
+  });
+}
+
+function recordFailure(key: string) {
+  const f = failures.get(key);
+  failures.set(key, f && f.until > Date.now() ? { n: f.n + 1, until: f.until } : { n: 1, until: Date.now() + WINDOW });
+  // تنظيف المداخل المنتهية حتى لا تكبر الذاكرة مع محاولات من عناوين كثيرة.
+  if (failures.size > 10_000) for (const [k, v] of failures) if (v.until <= Date.now()) failures.delete(k);
 }
 
 export async function login(username: string, password: string, ip: string): Promise<UserRow | undefined> {
   const user = username ? await findUser('username', username) : undefined;
   const ok = user ? await verifyPassword(password, user.password_hash) : false;
   if (ok) {
-    failures.delete(ip);
+    for (const [key] of keys(ip, username)) failures.delete(key);
     return user;
   }
-  const f = failures.get(ip);
-  failures.set(ip, f && f.until > Date.now() ? { n: f.n + 1, until: f.until } : { n: 1, until: Date.now() + WINDOW });
+  for (const [key] of keys(ip, username)) recordFailure(key);
   return undefined;
 }
 
