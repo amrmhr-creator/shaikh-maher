@@ -72,13 +72,14 @@
     gap: 14px;
     outline: none;
   }
-  .pr-pages > div {
+  /* الصفحات تُنشأ بالسكربت فلا تحمل وسم Astro، لذلك تحتاج :global */
+  .pr-pages > :global(div) {
     width: var(--w);
     aspect-ratio: var(--r);
     background: #fff;
     box-shadow: 0 2px 14px rgb(0 0 0 / 40%);
   }
-  .pr-pages canvas { display: block; width: 100%; height: 100%; }
+  .pr-pages :global(canvas) { display: block; width: 100%; height: 100%; }
   .pr-status { padding: 40px 20px; text-align: center; }
   .pr-msg { margin: 0 0 16px; }
 </style>
