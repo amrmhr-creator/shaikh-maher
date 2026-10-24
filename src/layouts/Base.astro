@@ -1,12 +1,12 @@
 ---
 import '../styles/global.css';
-import { NAV, SITE_NAME, SITE_SHORT, CONTACT_EMAIL, u, ar } from '../lib/site';
+import { NAV, SITE_NAME, SITE_SHORT, SITE_TAGLINE, CONTACT_EMAIL, u, ar } from '../lib/site';
 
 interface Props {
   title?: string;
   description?: string;
 }
-const { title, description = 'أرشيف تراث فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله: الدروس الصوتية والكتب والرسائل والفوائد.' } = Astro.props;
+const { title, description = 'أرشيف تراث فضيلة الشيخ ماهر إسماعيل جاهين رحمه الله: تسجيلات المجالس والكتب والرسائل والفوائد.' } = Astro.props;
 const fullTitle = title ? `${title} | ${SITE_SHORT}` : SITE_NAME;
 const path = Astro.url.pathname;
 const isCurrent = (href: string) => {
@@ -36,7 +36,7 @@ const isCurrent = (href: string) => {
       <div class="wrap">
         <a class="brand" href={u('/')}>
           <span class="brand-mark" aria-hidden="true">م</span>
-          <span class="brand-text"><strong>{SITE_SHORT}</strong><small>تراث علمي وإيماني</small></span>
+          <span class="brand-text"><strong>{SITE_SHORT}</strong></span>
         </a>
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="nav">القائمة</button>
         <nav class="nav" id="nav" aria-label="القائمة الرئيسية">
@@ -56,7 +56,7 @@ const isCurrent = (href: string) => {
         <div class="cols">
           <div>
             <h3>{SITE_NAME}</h3>
-            <p>أرشيف يجمع دروس الشيخ رحمه الله ورسائله وفوائده، ليبقى علمه نورًا لطلاب العلم.</p>
+            <p>{SITE_TAGLINE}</p>
           </div>
           <div>
             <h3>الأقسام</h3>

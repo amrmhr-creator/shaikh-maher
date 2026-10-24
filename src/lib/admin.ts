@@ -35,26 +35,25 @@ export interface CollectionAdmin {
 
 export const ADMIN: Record<CollectionName, CollectionAdmin> = {
   lessons: {
-    label: 'الدروس الصوتية',
-    singular: 'درس',
-    newLabel: 'درس جديد',
+    label: 'تسجيلات المجالس',
+    singular: 'مجلس',
+    newLabel: 'مجلس جديد',
     href: (id) => `/lessons/${id}/`,
     title: (e: any) => `${e.data.number}. ${e.data.title}`,
     sort: (a: any, b: any) => a.data.number - b.data.number,
     idFrom: (d) => String(d.number ?? '').padStart(2, '0'),
     fields: [
-      { name: 'title', label: 'عنوان الدرس', type: 'string', required: true },
-      { name: 'number', label: 'رقم الدرس', type: 'number', required: true, help: 'يحدد ترتيب الدرس ورابط صفحته.' },
-      { name: 'series', label: 'السلسلة', type: 'string', help: 'اتركها فارغة لتكون «دروس الشيخ ماهر الصوتية».' },
+      { name: 'title', label: 'عنوان المجلس', type: 'string', required: true },
+      { name: 'number', label: 'رقم المجلس', type: 'number', required: true, help: 'يحدد ترتيب المجلس ورابط صفحته.' },
+      { name: 'series', label: 'عنوان المجموعة', type: 'string', help: 'اتركها فارغة لتكون «بعض من التسجيلات الصوتية لمجالس الشيخ».' },
       { name: 'audio', label: 'الملف الصوتي', type: 'file', accept: 'audio/*', folder: 'audio', required: true },
       { name: 'duration', label: 'المدة', type: 'string', help: 'مثل 45:30' },
       topics,
-      { name: 'points', label: 'موضوعات الدرس', type: 'lines', help: 'كل سطر نقطة مستقلة.' },
-      { name: 'body', label: 'التفريغ النصي', type: 'markdown' },
+      { name: 'points', label: 'موضوعات المجلس', type: 'lines', help: 'كل سطر نقطة مستقلة. الآيات بين ﴿ ﴾ والأحاديث بين « » بعد ﷺ تظهر بخط مميز.' },
     ],
   },
   fawaid: {
-    label: 'الفوائد',
+    label: 'فوائد مختارة',
     singular: 'فائدة',
     newLabel: 'فائدة جديدة',
     href: (id) => `/fawaid/${id}/`,
@@ -77,11 +76,11 @@ export const ADMIN: Record<CollectionName, CollectionAdmin> = {
       },
       {
         name: 'media',
-        label: 'مقطع مرفق',
+        label: 'الفيديو أو الملف المرفق',
         type: 'object',
         fields: [
-          { name: 'type', label: 'النوع', type: 'select', options: [['video', 'فيديو'], ['audio', 'صوت']] },
-          { name: 'url', label: 'الملف', type: 'file', accept: 'video/*,audio/*', folder: 'fawaid' },
+          { name: 'url', label: 'الملف', type: 'file', accept: 'video/*,audio/*,image/*,application/pdf', folder: 'fawaid', help: 'فيديو في الأساس، ويمكن رفع صوت أو صورة أو PDF، ويُعرف النوع من الملف.' },
+          { name: 'poster', label: 'صورة الغلاف (اختياري)', type: 'image', accept: 'image/*', folder: 'fawaid', help: 'تظهر على بطاقة الفائدة. لو تُركت فارغة يظهر أول مشهد من الفيديو.' },
         ],
       },
       { name: 'body', label: 'شرح أو تعليق', type: 'markdown' },
@@ -103,6 +102,7 @@ export const ADMIN: Record<CollectionName, CollectionAdmin> = {
     sort: (a: any, b: any) => a.data.order - b.data.order,
     fields: [
       { name: 'title', label: 'عنوان الكتاب', type: 'string', required: true },
+      { name: 'kind', label: 'النوع', type: 'select', options: [['book', 'كتاب'], ['series', 'سلسلة']], help: 'يظهر بخط صغير فوق العنوان.' },
       { name: 'order', label: 'الترتيب', type: 'number', help: 'الأصغر يظهر أولًا.' },
       { name: 'summary', label: 'وصف الكتاب', type: 'text', required: true },
       { name: 'cover', label: 'الغلاف', type: 'image', accept: 'image/*', folder: 'books' },
@@ -209,13 +209,20 @@ export async function readForm(fields: Field[], form: FormData, prefix = ''): Pr
   return out;
 }
 
+function mediaType(url: string) {
+  if (/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(url)) return 'audio';
+  if (/\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(url)) return 'image';
+  if (/\.pdf(\?|$)/i.test(url)) return 'pdf';
+  return 'video';
+}
+
 /** الفائدة: نوع المصدر يُستنتج من العنصر المختار، ونوع المقطع من امتداد الملف. */
 export function prepareFawaid(data: Record<string, any>, lessonIds: Set<string>) {
   const { source, media } = data;
   if (source) data.source = source.ref ? { ...source, kind: lessonIds.has(source.ref) ? 'lesson' : 'book' } : undefined;
   if (media) {
     data.media = media.url
-      ? { url: media.url, type: media.type ?? (/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(media.url) ? 'audio' : 'video') }
+      ? { url: media.url, type: mediaType(media.url), ...(media.poster ? { poster: media.poster } : {}) }
       : undefined;
   }
   return data;

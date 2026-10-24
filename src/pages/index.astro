@@ -5,43 +5,40 @@ import LessonCard from '../components/LessonCard.astro';
 import FaidaCard from '../components/FaidaCard.astro';
 import Icon from '../components/Icon.astro';
 import Ornament from '../components/Ornament.astro';
-import GalleryGrid from '../components/GalleryGrid.astro';
 import Poem from '../components/Poem.astro';
 import { HOME_POEM } from '../data/poems';
-import { u, ar } from '../lib/site';
+import { u, ar, SITE_TAGLINE } from '../lib/site';
 import { TOPICS, type TopicSlug } from '../lib/topics';
 
 const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - b.data.number);
 const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
 const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === 'published');
-const featured = fawaid[0];
-const photos = (await getCollection('gallery')).sort((a, b) => a.data.order - b.data.order || a.id.localeCompare(b.id));
 
 const topicCount = (slug: TopicSlug) =>
   lessons.filter((l) => l.data.topics.includes(slug)).length + fawaid.filter((f) => f.data.topics.includes(slug)).length;
 
 const sections = [
-  { href: '/lessons/', icon: 'headphones', title: 'الدروس الصوتية', text: `${ar(lessons.length)} دروس بتسجيلات الشيخ وملخص موضوعاتها` },
-  { href: '/books/', icon: 'book', title: 'الكتب والرسائل', text: 'رسائله الإيمانية في تزكية النفس ودروسه المفرغة' },
-  { href: '/fawaid/', icon: 'quote', title: 'الفوائد', text: 'مقتطفات قصيرة من كلامه مربوطة بمصدرها' },
-  { href: '/about/', icon: 'user', title: 'عن الشيخ', text: 'سيرته من النوبة إلى عطبرة ومجالس العلم' },
-  { href: '/fathallah/', icon: 'user', title: 'الشيخ فتح الله إمام حمودة', text: 'تلميذ الشيخ وحامل تراثه' },
-  { href: '/gallery/', icon: 'image', title: 'مكتبة الصور', text: 'صور الشيخ الفردية والجماعية' },
+  { href: '/lessons/', icon: 'headphones', title: 'تسجيلات المجالس' },
+  { href: '/books/', icon: 'book', title: 'الكتب والرسائل' },
+  { href: '/fawaid/', icon: 'quote', title: 'فوائد مختارة' },
+  { href: '/about/', icon: 'user', title: 'تعريف بالشيخ' },
+  { href: '/fathallah/', icon: 'user', title: 'الشيخ فتح الله إمام حمودة' },
+  { href: '/gallery/', icon: 'image', title: 'مكتبة الصور' },
 ] as const;
 ---
 <Base>
   <section class="hero" style={`--hero-photo: url(${u('/media/images/sheikh-hero.webp')})`}>
     <div class="wrap hero-inner">
       <p class="eyebrow">١٩٠٨ – ١٩٨٧ م · رحمه الله</p>
-      <h1>فضيلة الشيخ<br />ماهر إسماعيل جاهين</h1>
-      <p class="lead">عالم نوبي ربّى تلاميذه على التوحيد وتزكية النفس. هنا نجمع تراثه من دروس صوتية ورسائل وفوائد، ليبقى علمه نورًا لطلاب العلم.</p>
+      <h1><span class="h1-pre">فضيلة الشيخ</span><span class="h1-name">ماهر إسماعيل جاهين</span></h1>
+      <p class="lead">{SITE_TAGLINE}</p>
       <div class="actions">
         <a class="btn gold" href={u('/lessons/')}><Icon name="headphones" size={18} /> استمع إلى الدروس</a>
         <a class="btn on-deep" href={u('/books/')}><Icon name="book" size={18} /> تصفح الكتب</a>
       </div>
       <form class="hero-search" action={u('/search/')} role="search">
         <Icon name="search" size={18} />
-        <input type="search" name="q" placeholder="ابحث في الدروس والكتب والفوائد…" aria-label="بحث" />
+        <input type="search" name="q" placeholder="ابحث في المجالس والكتب والفوائد…" aria-label="بحث" />
       </form>
     </div>
   </section>
@@ -52,23 +49,21 @@ const sections = [
         <a class="card link tile" href={u(s.href)}>
           <span class="tile-icon"><Icon name={s.icon} size={26} /></span>
           <strong>{s.title}</strong>
-          <span class="meta">{s.text}</span>
         </a>
       ))}
     </section>
 
     <section class="section home-poem" aria-label="أبيات في الشيخ">
-      <Poem poem={HOME_POEM} eyebrow="في مدح الشيخ" preview={4} />
+      <Poem poem={HOME_POEM} showTitle={false} />
     </section>
 
     <section class="section fathallah pattern">
       <figure class="arch"><img src={u('/media/images/shaikh-fathalla.webp')} alt="الشيخ فتح الله إمام حمودة" loading="lazy" /></figure>
       <div>
-        <p class="eyebrow">تلميذه وحامل تراثه</p>
         <h2>الشيخ فتح الله إمام حمودة</h2>
-        <p class="lead">المريد الأمين، وحارس الإرث، وصديق الشيخ ماهر جاهين، رحمهما الله. فرّغ دروس الشيخ من أشرطة الكاسيت، فحفظ لنا «سلسلة الدروس الإيمانية».</p>
+        <p class="lead">حارس الإرث وصديق الشيخ ماهر جاهين، رحمهما الله. فرّغ دروس الشيخ من أشرطة الكاسيت، فحفظ لنا «سلسلة الدروس الإيمانية».</p>
         <div class="actions">
-          <a class="btn gold" href={u('/fathallah/')}>سيرته كاملة</a>
+          <a class="btn gold" href={u('/fathallah/')}>سيرته</a>
           <a class="btn on-deep" href={u('/books/dros/')}>سلسلة الدروس الإيمانية</a>
         </div>
       </div>
@@ -76,22 +71,22 @@ const sections = [
 
     <Ornament />
 
-    {featured && (
-      <section class="featured">
-        <p class="eyebrow">فائدة مختارة</p>
-        <span class="big-quote" aria-hidden="true">”</span>
-        <h2>{featured.data.quote ?? featured.data.title}</h2>
-        {featured.data.summary && <p class="lead">{featured.data.summary}</p>}
-        <a class="btn" href={u(`/fawaid/${featured.id}/`)}>
-          {featured.data.media?.type === 'video' ? <><Icon name="play" size={16} /> شاهد الفائدة</> : 'اقرأ الفائدة'}
-        </a>
+    {fawaid.length > 0 && (
+      <section class="section">
+        <div class="section-head">
+          <div><p class="eyebrow">تأمل</p><h2>فوائد مختارة</h2></div>
+          <a href={u('/fawaid/')}>كل الفوائد <Icon name="arrow" size={16} /></a>
+        </div>
+        <div class="reels">{fawaid.slice(0, 4).map((f) => <FaidaCard faida={f} />)}</div>
       </section>
     )}
 
+    <Ornament />
+
     <section class="section">
       <div class="section-head">
-        <div><p class="eyebrow">استمع</p><h2>الدروس الصوتية</h2></div>
-        <a href={u('/lessons/')}>كل الدروس <Icon name="arrow" size={16} /></a>
+        <div><p class="eyebrow">استمع</p><h2>تسجيلات المجالس</h2></div>
+        <a href={u('/lessons/')}>كل المجالس <Icon name="arrow" size={16} /></a>
       </div>
       <div class="grid">{lessons.slice(0, 6).map((l) => <LessonCard lesson={l} />)}</div>
     </section>
@@ -111,6 +106,7 @@ const sections = [
               <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={34} /></span>
             </div>
             <div>
+              <p class="kind">{b.data.kind === 'series' ? 'سلسلة' : 'كتاب'}</p>
               <h3><a href={u(`/books/${b.id}/`)}>{b.data.title}</a></h3>
               <p class="meta">{b.data.summary}</p>
             </div>
@@ -118,18 +114,6 @@ const sections = [
         ))}
       </div>
     </section>
-
-    <Ornament />
-
-    {photos.length > 0 && (
-      <section class="section">
-        <div class="section-head">
-          <div><p class="eyebrow">شاهد</p><h2>مكتبة الصور</h2></div>
-          <a href={u('/gallery/')}>كل الصور <Icon name="arrow" size={16} /></a>
-        </div>
-        <GalleryGrid photos={photos.slice(0, 8)} compact />
-      </section>
-    )}
 
     <Ornament />
 
@@ -147,15 +131,6 @@ const sections = [
       </div>
     </section>
 
-    {fawaid.length > 1 && (
-      <section class="section">
-        <div class="section-head">
-          <div><p class="eyebrow">تأمل</p><h2>من الفوائد</h2></div>
-          <a href={u('/fawaid/')}>كل الفوائد <Icon name="arrow" size={16} /></a>
-        </div>
-        <div class="grid">{fawaid.slice(1, 4).map((f) => <FaidaCard faida={f} />)}</div>
-      </section>
-    )}
   </div>
 </Base>
 
@@ -179,7 +154,9 @@ const sections = [
   }
   .hero-inner { display: grid; justify-items: center; }
   .hero-inner > * { min-width: 0; }
-  .hero h1 { color: var(--on-deep); font-size: clamp(2.4rem, 7vw, 4.4rem); text-shadow: 0 2px 18px rgb(0 0 0 / 45%); }
+  .hero h1 { display: grid; justify-items: center; gap: .1em; color: var(--on-deep); text-shadow: 0 2px 18px rgb(0 0 0 / 45%); }
+  .h1-pre { font-size: clamp(1.5rem, 3.6vw, 2.2rem); color: var(--gold-on-deep); }
+  .h1-name { font-size: clamp(2.4rem, 7vw, 4.4rem); line-height: 1.25; }
   .hero .eyebrow { color: var(--gold-on-deep); }
   .hero .lead { color: var(--on-deep); max-width: 640px; margin-bottom: 28px; text-shadow: 0 1px 10px rgb(0 0 0 / 50%); }
   .hero .actions { justify-content: center; }
@@ -246,29 +223,8 @@ const sections = [
     margin-bottom: 6px;
   }
 
-  .featured {
-    margin-top: 64px;
-    text-align: center;
-    padding: 48px 24px;
-    border-radius: 24px;
-    background: var(--surface);
-    border: 1px solid var(--gold-soft);
-    position: relative;
-    overflow: hidden;
-  }
-  .featured .lead { margin-inline: auto; }
-  .big-quote {
-    position: absolute;
-    top: 4px;
-    inset-inline-end: 28px;
-    font-family: var(--font-display);
-    font-size: 8rem;
-    line-height: 1;
-    color: var(--gold-soft);
-    pointer-events: none;
-  }
-  .featured h2 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); position: relative; }
 
+  .kind { margin: 0; font-size: .82rem; font-weight: 600; color: var(--gold); }
   .shelf {
     display: grid;
     gap: 18px;

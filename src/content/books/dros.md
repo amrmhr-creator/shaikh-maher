@@ -1,5 +1,6 @@
 ---
-title: "سلسلة الدروس الإيمانية"
+title: "الدروس الإيمانية"
+kind: series
 order: 2
 summary: "مجموعة الدروس الإيمانية وقد طُبعت ونُشرت في كتيبات منفصلة."
 cover: "media/books/dros-cover.webp"

@@ -329,6 +329,13 @@ main {
   gap: 18px;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
 }
+/* بطاقات الفوائد العمودية (ريلز) */
+.reels {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(46%, 210px), 1fr));
+}
+@media (min-width: 900px) { .reels { grid-template-columns: repeat(4, 1fr); } }
 
 .card {
   position: relative;

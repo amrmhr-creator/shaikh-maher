@@ -1,11 +1,11 @@
 ---
-import { getCollection, renderBody } from '../../lib/content';
+import { getCollection } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import AudioPlayer from '../../components/AudioPlayer.astro';
 import FaidaCard from '../../components/FaidaCard.astro';
 import Icon from '../../components/Icon.astro';
-import { u, lessonLabel } from '../../lib/site';
+import { u, lessonLabel, markScripture } from '../../lib/site';
 import { TOPICS } from '../../lib/topics';
 
 const lessons = (await getCollection('lessons')).sort((a, b) => a.data.number - b.data.number);
@@ -13,14 +13,12 @@ const i = lessons.findIndex((l) => l.id === Astro.params.slug);
 if (i < 0) return Astro.rewrite('/404/');
 const [lesson, prev, next] = [lessons[i], lessons[i - 1], lessons[i + 1]];
 const d = lesson.data;
-const transcript = renderBody(lesson);
-const hasTranscript = Boolean(transcript);
 const fawaid = (await getCollection('fawaid')).filter(
   (f) => f.data.status === 'published' && f.data.source?.kind === 'lesson' && f.data.source.ref === lesson.id,
 );
 ---
 <Base title={d.title} description={`${lessonLabel(d.number)}: ${d.title}`}>
-  <PageHero eyebrow={`${d.series} · ${lessonLabel(d.number)}`} title={d.title}>
+  <PageHero eyebrow={`تسجيلات المجالس · ${lessonLabel(d.number)}`} title={d.title}>
     <ul class="tags">
       {d.topics.map((t) => <li><a class="tag" href={u(`/topics/${t}/`)}>{TOPICS[t]}</a></li>)}
     </ul>
@@ -33,32 +31,30 @@ const fawaid = (await getCollection('fawaid')).filter(
 
     <div class="lesson-body">
       <section class="section">
-        <h2>موضوعات الدرس</h2>
-        <ul class="points">{d.points.map((p) => <li>{p}</li>)}</ul>
+        <h2>موضوعات المجلس</h2>
+        <ul class="points topics-list">{d.points.map((p) => <li set:html={markScripture(p)} />)}</ul>
       </section>
 
       {fawaid.length > 0 && (
         <section class="section">
-          <h2>فوائد من هذا الدرس</h2>
-          <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+          <h2>فوائد من هذا المجلس</h2>
+          <div class="reels">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
         </section>
       )}
-
-      <section class="section">
-        <h2>التفريغ النصي</h2>
-        {hasTranscript ? <div class="prose" set:html={transcript} /> : <p class="empty">التفريغ النصي لهذا الدرس قيد الإعداد.</p>}
-      </section>
     </div>
 
-    <nav class="pager section" aria-label="التنقل بين الدروس">
-      {prev ? <a class="card link" href={u(`/lessons/${prev.id}/`)}><span class="meta">الدرس السابق</span><strong>{prev.data.title}</strong></a> : <span></span>}
-      {next && <a class="card link next" href={u(`/lessons/${next.id}/`)}><span class="meta">الدرس التالي <Icon name="arrow" size={14} /></span><strong>{next.data.title}</strong></a>}
+    <nav class="pager section" aria-label="التنقل بين المجالس">
+      {prev ? <a class="card link" href={u(`/lessons/${prev.id}/`)}><span class="meta">المجلس السابق</span><strong>{prev.data.title}</strong></a> : <span></span>}
+      {next && <a class="card link next" href={u(`/lessons/${next.id}/`)}><span class="meta">المجلس التالي <Icon name="arrow" size={14} /></span><strong>{next.data.title}</strong></a>}
     </nav>
   </div>
 </Base>
 <style>
   .player-card { margin-top: -72px; position: relative; }
   .lesson-body { max-width: 780px; }
+  .topics-list li { font-size: 1.08rem; line-height: 2.1; color: var(--text); margin-bottom: 12px; }
+  .topics-list :global(.ayah) { font-family: var(--font-display); font-size: 1.12em; color: var(--accent); }
+  .topics-list :global(.hadith) { font-family: var(--font-display); font-size: 1.12em; color: var(--gold); font-weight: 700; }
   .pager { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); }
   .pager a { display: grid; gap: 4px; text-decoration: none; color: inherit; }
   .pager strong { font-family: var(--font-display); font-size: 1.15rem; }

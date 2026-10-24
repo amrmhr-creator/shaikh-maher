@@ -1,11 +1,11 @@
 ---
-// شبكة صور مع عارض مكبّر (dialog). تُستخدم في صفحة مكتبة الصور وفي الصفحة الرئيسية.
+// شبكة صور بأعمدة متتالية (masonry) تناسب الصور الطولية والعرضية معًا، مع عارض مكبّر يتنقل بين الصور.
 import type { CollectionEntry } from '../lib/schemas';
 import { u } from '../lib/site';
 interface Props { photos: CollectionEntry<'gallery'>[]; compact?: boolean }
 const { photos, compact = false } = Astro.props;
 ---
-<ul class:list={['gallery', { compact }]}>
+<ul class:list={['gallery', { compact }]} style={`--cols:${Math.max(1, Math.min(compact ? 4 : 3, photos.length))}`}>
   {photos.map((p) => (
     <li data-person={p.data.person}>
       <button type="button" class="shot" data-src={u(p.data.image)} data-caption={p.data.caption}>
@@ -17,20 +17,22 @@ const { photos, compact = false } = Astro.props;
 </ul>
 <dialog class="viewer" aria-label="عرض الصورة">
   <form method="dialog"><button class="close" aria-label="إغلاق">×</button></form>
+  <button type="button" class="nav prev" aria-label="الصورة السابقة">‹</button>
   <figure>
     <img alt="" />
     <figcaption></figcaption>
   </figure>
+  <button type="button" class="nav next" aria-label="الصورة التالية">›</button>
 </dialog>
 <style>
   .gallery {
     list-style: none;
     margin: 0;
     padding: 0;
-    columns: 3 260px;
+    columns: var(--cols) 240px;
     column-gap: 16px;
   }
-  .gallery.compact { columns: 4 200px; }
+  .gallery.compact { columns: var(--cols) 200px; }
   .gallery li { break-inside: avoid; margin-bottom: 16px; }
   .gallery li[hidden] { display: none; }
   .shot {
@@ -45,7 +47,7 @@ const { photos, compact = false } = Astro.props;
     cursor: zoom-in;
     box-shadow: var(--shadow);
   }
-  .shot img { width: 100%; transition: transform 0.3s; }
+  .shot img { display: block; width: 100%; height: auto; transition: transform 0.3s; }
   .shot:hover img { transform: scale(1.04); }
   .cap {
     position: absolute;
@@ -71,7 +73,24 @@ const { photos, compact = false } = Astro.props;
   }
   .viewer::backdrop { background: rgb(6 20 16 / 88%); }
   .viewer figure { margin: 0; text-align: center; }
-  .viewer img { max-height: 80vh; width: auto; margin-inline: auto; border-radius: 10px; }
+  .viewer img { max-height: 80vh; max-width: 100%; width: auto; margin-inline: auto; border-radius: 10px; }
+  .nav {
+    position: fixed;
+    top: 50%;
+    translate: 0 -50%;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgb(216 180 106 / 60%);
+    background: rgb(0 0 0 / 35%);
+    color: #f6efdc;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .nav.prev { inset-inline-start: 16px; }
+  .nav.next { inset-inline-end: 16px; }
+  .nav[hidden] { display: none; }
   .viewer figcaption { color: #f6efdc; margin-top: 12px; font-size: 1rem; }
   .close {
     position: fixed;
@@ -92,13 +111,37 @@ const { photos, compact = false } = Astro.props;
     const dlg = grid.nextElementSibling as HTMLDialogElement;
     const img = dlg.querySelector('img')!;
     const cap = dlg.querySelector('figcaption')!;
-    grid.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.shot');
-      if (!btn) return;
+    const prev = dlg.querySelector<HTMLButtonElement>('.prev')!;
+    const next = dlg.querySelector<HTMLButtonElement>('.next')!;
+    let shots: HTMLButtonElement[] = [];
+    let i = 0;
+    const show = (n: number) => {
+      i = (n + shots.length) % shots.length;
+      const btn = shots[i];
       img.src = btn.dataset.src!;
       img.alt = btn.dataset.caption!;
       cap.textContent = btn.dataset.caption!;
+      prev.hidden = next.hidden = shots.length < 2;
+    };
+    grid.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.shot');
+      if (!btn) return;
+      shots = [...grid.querySelectorAll<HTMLButtonElement>('li:not([hidden]) .shot')];
+      show(shots.indexOf(btn));
       dlg.showModal();
+    });
+    // في الواجهة العربية: السهم الأيمن للسابقة والأيسر للتالية.
+    prev.addEventListener('click', () => show(i - 1));
+    next.addEventListener('click', () => show(i + 1));
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(i - 1);
+      if (e.key === 'ArrowLeft') show(i + 1);
+    });
+    let x0 = 0;
+    dlg.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    dlg.addEventListener('touchend', (e) => {
+      const dx = e.changedTouches[0].clientX - x0;
+      if (Math.abs(dx) > 50 && shots.length > 1) show(dx > 0 ? i + 1 : i - 1);
     });
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
   }

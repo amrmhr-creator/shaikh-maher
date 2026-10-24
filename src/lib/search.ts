@@ -36,7 +36,7 @@ export async function search(query: string): Promise<Hit[]> {
   if (!terms.length) return [];
   const docs: { href: string; kind: string; title: string; text: string }[] = [];
   for (const l of await getCollection('lessons')) {
-    docs.push({ href: `/lessons/${l.id}/`, kind: lessonLabel(l.data.number), title: l.data.title, text: [...l.data.points, l.body].join(' \n') });
+    docs.push({ href: `/lessons/${l.id}/`, kind: lessonLabel(l.data.number), title: l.data.title, text: l.data.points.join(' \n') });
   }
   for (const b of await getCollection('books')) {
     docs.push({ href: `/books/${b.id}/`, kind: 'كتاب', title: b.data.title, text: [b.data.summary, ...b.data.chapters.map((c) => c.title), b.body].join(' \n') });

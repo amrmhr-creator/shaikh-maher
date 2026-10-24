@@ -9,7 +9,7 @@ const opt = () => z.preprocess(blank, z.string().optional());
 const lessons = z.object({
   title: z.string().min(1, 'عنوان الدرس مطلوب'),
   number: z.number({ message: 'رقم الدرس مطلوب' }).int().positive(),
-  series: z.string().default('دروس الشيخ ماهر الصوتية'),
+  series: z.string().default('بعض من التسجيلات الصوتية لمجالس الشيخ'),
   audio: z.string().min(1, 'الملف الصوتي مطلوب'),
   duration: opt(),
   topics: z.array(topic).default([]),
@@ -25,6 +25,7 @@ const chapter = z.union([
 // كتاب أو رسالة.
 const books = z.object({
   title: z.string().min(1, 'عنوان الكتاب مطلوب'),
+  kind: z.enum(['book', 'series']).default('book'),
   order: z.number().default(10),
   summary: z.string().min(1, 'وصف الكتاب مطلوب'),
   cover: opt(),
@@ -47,7 +48,8 @@ const fawaid = z.object({
       chapter: opt(),
     })
     .optional(),
-  media: z.object({ type: z.enum(['video', 'audio']), url: z.string() }).optional(),
+  // الفيديو هو الأساس، ويمكن إرفاق صوت أو صورة أو PDF. poster صورة الغلاف في البطاقة.
+  media: z.object({ type: z.enum(['video', 'audio', 'image', 'pdf']), url: z.string(), poster: opt() }).optional(),
   status: z.enum(['draft', 'review', 'published']).default('draft'),
 });
 

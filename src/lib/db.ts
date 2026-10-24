@@ -1,4 +1,5 @@
 // اتصال قاعدة بيانات MySQL على الاستضافة، وإنشاء الجداول وتعبئتها بالمحتوى الأولي عند أول تشغيل.
+import { createHash } from 'node:crypto';
 import mysql from 'mysql2/promise';
 import { parse as parseYaml } from 'yaml';
 import { schemas, type CollectionName } from './schemas';
@@ -63,27 +64,77 @@ async function init(p: mysql.Pool) {
   await bootstrapAdmin(p);
 }
 
-// المحتوى الأولي: ملفات src/content/*.md تُضم داخل البناء وتُنقل إلى القاعدة مرة واحدة فقط.
+// المحتوى الأولي: ملفات src/content/*.md تُضم داخل البناء وتُنقل إلى القاعدة.
+// عند تغيّر هذه الملفات في تحديث جديد تُحدَّث المداخل التي لم تُعدَّل من لوحة التحكم فقط
+// (updated_at = created_at)، وتُحذف المداخل الأولية التي أُزيلت ملفاتها إن لم تُعدَّل.
 const SEED = import.meta.glob('../content/**/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
 
-async function seedContent(p: mysql.Pool) {
-  const [rows] = await p.query<mysql.RowDataPacket[]>(`SELECT value FROM meta WHERE name = 'seeded'`);
-  if (rows.length) return;
+function seedEntries() {
+  const out: { collection: CollectionName; id: string; data: string; body: string }[] = [];
   for (const [file, raw] of Object.entries(SEED)) {
     const m = file.match(/content\/([^/]+)\/(.+)\.md$/);
     if (!m || !(m[1] in schemas)) continue;
     const collection = m[1] as CollectionName;
     const fm = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
     const data = schemas[collection].parse(parseYaml(fm ? fm[1] : '') ?? {});
-    const body = (fm ? fm[2] : raw).trim();
-    await p.query(`INSERT IGNORE INTO entries (collection, id, data, body) VALUES (?, ?, ?, ?)`, [
-      collection,
-      m[2],
-      JSON.stringify(data),
-      body,
-    ]);
+    out.push({ collection, id: m[2], data: JSON.stringify(data), body: (fm ? fm[2] : raw).trim() });
   }
-  await p.query(`INSERT IGNORE INTO meta (name, value) VALUES ('seeded', ?)`, [new Date().toISOString()]);
+  return out;
+}
+
+const keyOf = (e: { collection: string; id: string }) => `${e.collection}/${e.id}`;
+
+async function getMeta(p: mysql.Pool, name: string): Promise<string | undefined> {
+  const [rows] = await p.query<mysql.RowDataPacket[]>(`SELECT value FROM meta WHERE name = ?`, [name]);
+  return rows[0]?.value ?? undefined;
+}
+const setMeta = (p: mysql.Pool, name: string, value: string) =>
+  p.query(`INSERT INTO meta (name, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)`, [name, value]);
+
+async function seedContent(p: mysql.Pool) {
+  const seed = seedEntries();
+  const version = createHash('sha256').update(JSON.stringify(seed)).digest('hex');
+  const seeded = await getMeta(p, 'seeded');
+  if (!seeded) {
+    for (const e of seed) {
+      await p.query(`INSERT IGNORE INTO entries (collection, id, data, body) VALUES (?, ?, ?, ?)`, [e.collection, e.id, e.data, e.body]);
+    }
+    await setMeta(p, 'seeded', new Date().toISOString());
+  } else if ((await getMeta(p, 'seed_version')) !== version) {
+    await syncSeed(p, seed, seeded);
+  }
+  await setMeta(p, 'seed_ids', JSON.stringify(seed.map(keyOf)));
+  await setMeta(p, 'seed_version', version);
+}
+
+async function syncSeed(p: mysql.Pool, seed: ReturnType<typeof seedEntries>, seededAt: string) {
+  const stored = await getMeta(p, 'seed_ids');
+  let previous: Set<string>;
+  if (stored) previous = new Set(JSON.parse(stored));
+  else {
+    // قواعد أقدم لم تسجّل المداخل الأولية: هي التي أُنشئت مع التعبئة الأولى.
+    const [rows] = await p.query<mysql.RowDataPacket[]>(
+      `SELECT collection, id FROM entries WHERE created_at <= ? + INTERVAL 5 MINUTE`,
+      [new Date(seededAt)],
+    );
+    previous = new Set(rows.map((r) => keyOf(r as any)));
+  }
+  const current = new Set(seed.map(keyOf));
+  for (const e of seed) {
+    if (!previous.has(keyOf(e))) {
+      await p.query(`INSERT IGNORE INTO entries (collection, id, data, body) VALUES (?, ?, ?, ?)`, [e.collection, e.id, e.data, e.body]);
+    } else {
+      await p.query(
+        `UPDATE entries SET data = ?, body = ?, updated_at = created_at WHERE collection = ? AND id = ? AND updated_at = created_at`,
+        [e.data, e.body, e.collection, e.id],
+      );
+    }
+  }
+  for (const key of previous) {
+    if (current.has(key)) continue;
+    const [collection, id] = key.split('/');
+    await p.query(`DELETE FROM entries WHERE collection = ? AND id = ? AND updated_at = created_at`, [collection, id]);
+  }
 }
 
 // أول مستخدم للوحة التحكم يُنشأ من ADMIN_USERNAME و ADMIN_PASSWORD إذا لم يوجد أي مستخدم.

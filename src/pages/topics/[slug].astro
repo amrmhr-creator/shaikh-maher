@@ -20,7 +20,7 @@ const fawaid = (await getCollection('fawaid')).filter((f) => f.data.status === '
     {fawaid.length > 0 && (
       <section>
         <div class="section-head"><h2>الفوائد</h2></div>
-        <div class="grid">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
+        <div class="reels">{fawaid.map((f) => <FaidaCard faida={f} />)}</div>
       </section>
     )}
     <section class={fawaid.length > 0 ? 'section' : ''}>

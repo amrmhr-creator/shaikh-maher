@@ -23,7 +23,8 @@ post() { req "$1" -H "Origin: $B" "${@:2}"; }
 echo '== public pages'
 req 200 "$B/"; has 'حقيقة الحياة الدنيا'; has 'الشيخ فتح الله'
 req 200 "$B/lessons/"
-req 200 "$B/lessons/01/"; has 'حقيقة الحياة الدنيا'; has 'media.shaikhmaher.com/audio/1.mp3'
+req 200 "$B/lessons/01/"; has 'مراتب التوحيد'; has 'media.shaikhmaher.com/audio/5.mp3'; has 'class="ayah"'; lacks 'التفريغ النصي'
+req 200 "$B/lessons/05/"; has 'حقيقة الحياة الدنيا'
 req 200 "$B/books/"
 req 200 "$B/books/rasayel/"; has 'في الإيثار'
 req 200 "$B/fawaid/"
@@ -48,7 +49,7 @@ post 403 -H 'Origin: https://evil.example' -d 'username=admin&password=ci-passwo
 post 303 -d 'username=admin&password=ci-password-123' "$B/admin/login/"
 req 200 "$B/admin/"; has 'أهلًا admin'
 for c in lessons fawaid books gallery; do req 200 "$B/admin/$c/"; req 200 "$B/admin/$c/new/"; done
-req 200 "$B/admin/lessons/01/"; has 'حقيقة الحياة الدنيا'
+req 200 "$B/admin/lessons/01/"; has 'مراتب التوحيد'
 req 200 "$B/admin/books/rasayel/"; has 'في الإيثار'
 req 200 "$B/admin/gallery/upload/"
 req 200 "$B/admin/account/"
@@ -74,20 +75,18 @@ post 422 -F 'caption=بدون صورة' -F '_action=save' "$B/admin/gallery/new/
 
 echo '== fawaid: create draft, publish, link to lesson'
 post 303 -F 'title=فائدة تجريبية عن الصبر' -F 'quote=الصبر مفتاح الفرج' -F 'topics=tazkiyah' -F 'source.ref=03' -F 'source.at=12:30' -F 'status=draft' -F '_action=save' "$B/admin/fawaid/new/"
-req 200 "$B/fawaid/"; lacks 'الصبر مفتاح الفرج'
+req 200 "$B/fawaid/"; lacks 'فائدة تجريبية عن الصبر'
 req 200 "$B/admin/fawaid/"; has 'فائدة تجريبية عن الصبر'
 fid=$(grep -o '/admin/fawaid/[^/"]*/' "$OUT" | grep -v '/new/' | grep -v haqiqat | head -1)
 post 303 -F 'title=فائدة تجريبية عن الصبر' -F 'quote=الصبر مفتاح الفرج' -F 'topics=tazkiyah' -F 'source.ref=03' -F 'source.at=12:30' -F 'status=published' -F '_action=save' "$B$fid"
-req 200 "$B/fawaid/"; has 'الصبر مفتاح الفرج'
-req 200 "$B/lessons/03/"; has 'الصبر مفتاح الفرج'
+req 200 "$B/fawaid/"; has 'فائدة تجريبية عن الصبر'
+req 200 "$B/lessons/03/"; has 'فائدة تجريبية عن الصبر'
 req 200 -G --data-urlencode 'q=مفتاح الفرج' "$B/search/"; has 'فائدة تجريبية عن الصبر'
 
-echo '== lessons: transcript + duplicate number'
+echo '== lessons: create + duplicate number'
 post 303 -F 'title=درس تجريبي' -F 'number=42' -F "audio=https://media.shaikhmaher.com/audio/42.mp3" -F 'points=النقطة الأولى
-النقطة الثانية' -F 'body=## عنوان فرعي
-
-نص **التفريغ** هنا.' -F '_action=save' "$B/admin/lessons/new/"
-req 200 "$B/lessons/42/"; has 'النقطة الثانية'; has '<strong>التفريغ</strong>'; has '<h2'
+النقطة الثانية' -F '_action=save' "$B/admin/lessons/new/"
+req 200 "$B/lessons/42/"; has 'النقطة الثانية'
 post 422 -F 'title=درس مكرر' -F 'number=42' -F 'audio=x.mp3' -F '_action=save' "$B/admin/lessons/new/"; has 'بنفس الرقم'
 post 303 -F '_action=delete' "$B/admin/lessons/42/"
 req 404 "$B/lessons/42/"

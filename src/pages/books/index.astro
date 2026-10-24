@@ -4,11 +4,14 @@ import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
 import { u } from '../../lib/site';
+import PdfReader from '../../components/PdfReader.astro';
+
+const KIND = { book: 'كتاب', series: 'سلسلة' } as const;
 
 const books = (await getCollection('books')).sort((a, b) => a.data.order - b.data.order);
 ---
-<Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتبه ودروسه المفرغة.">
-  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="مجموعة من الرسائل الإيمانية والكتابات التربوية التي خصَّ بها الشيخ رحمه الله أحبابه إجابةً على أسئلتهم، مضافًا إليها تفريغات لبعض تسجيلاته الصوتية ودروسه المباركة، نضعها بين يديك قراءةً واستفادة." />
+<Base title="الكتب والرسائل" description="رسائل الشيخ ماهر إسماعيل جاهين الإيمانية وكتاباته التربوية.">
+  <PageHero eyebrow="اقرأ" title="الكتب والرسائل" lead="مجموعة من الرسائل الإيمانية والكتابات التربوية التي خصَّ بها الشيخ رحمه الله أحبابه إجابةً على أسئلتهم، نضعها بين يديك قراءةً واستفادة." />
   <div class="wrap"><p class="note">خالص الدعاء بالرحمة والمغفرة لفضيلة الشيخ فتح الله حموده رحمه الله، والشكر موصول لأبنائه وطلابه على مساهمتهم المقدرة. نسأل الله العلي القدير أن يكتب أجرها وثوابها للشيوخ الأفاضل، ولكل من ساهم في إيصالها إلى الطلاب والقراء.</p></div>
   <div class="wrap books">
     {books.map((b) => (
@@ -18,19 +21,24 @@ const books = (await getCollection('books')).sort((a, b) => a.data.order - b.dat
           <span class="cover-fallback" aria-hidden="true"><Icon name="book" size={40} /></span>
         </div>
         <div>
+          <p class="kind">{KIND[b.data.kind]}</p>
           <h2>{b.data.title}</h2>
           <p class="lead">{b.data.summary}</p>
           <div class="actions">
-            <a class="btn" href={u(`/books/${b.id}/`)}>تفاصيل الكتاب</a>
+            <a class="btn" href={u(`/books/${b.id}/`)}>{b.data.kind === 'series' ? 'تفاصيل السلسلة' : 'تفاصيل الكتاب'}</a>
+            {b.data.pdf && <button class="btn ghost" type="button" data-pdf={b.data.pdf} data-pdf-title={b.data.title}><Icon name="book" size={18} /> تصفّح</button>}
             {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download><Icon name="download" size={18} /> تحميل PDF</a>}
           </div>
         </div>
       </article>
     ))}
   </div>
+  <PdfReader />
 </Base>
 <style>
   .books { display: grid; gap: 22px; }
+  .kind { margin: 0 0 2px; font-size: .85rem; font-weight: 600; color: var(--gold); letter-spacing: .02em; }
+  .book h2 { margin-top: 0; }
   .book { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: center; }
   @media (min-width: 640px) { .book { grid-template-columns: 190px 1fr; } }
   .cover {
