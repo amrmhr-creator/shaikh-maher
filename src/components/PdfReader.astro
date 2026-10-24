@@ -14,7 +14,10 @@
     </div>
   </header>
   <div class="pr-pages" tabindex="0"></div>
-  <p class="pr-status" hidden></p>
+  <div class="pr-status" hidden>
+    <p class="pr-msg"></p>
+    <a class="btn gold pr-open" target="_blank" rel="noopener" hidden>افتح الملف في نافذة جديدة</a>
+  </div>
 </dialog>
 
 <style>
@@ -76,7 +79,8 @@
     box-shadow: 0 2px 14px rgb(0 0 0 / 40%);
   }
   .pr-pages canvas { display: block; width: 100%; height: 100%; }
-  .pr-status { margin: 0; padding: 40px 20px; text-align: center; }
+  .pr-status { padding: 40px 20px; text-align: center; }
+  .pr-msg { margin: 0 0 16px; }
 </style>
 
 <script>
@@ -90,6 +94,8 @@
   if (dialog) {
     const pages = dialog.querySelector<HTMLElement>('.pr-pages')!;
     const status = dialog.querySelector<HTMLElement>('.pr-status')!;
+    const msg = dialog.querySelector<HTMLElement>('.pr-msg')!;
+    const openLink = dialog.querySelector<HTMLAnchorElement>('.pr-open')!;
     const pageLabel = dialog.querySelector<HTMLElement>('.pr-page')!;
     const download = dialog.querySelector<HTMLAnchorElement>('.pr-download')!;
     let doc: any;
@@ -97,7 +103,7 @@
     let observer: IntersectionObserver | undefined;
     let token = 0;
 
-    const say = (text: string) => { status.textContent = text; status.hidden = !text; };
+    const say = (text: string, offerTab = false) => { msg.textContent = text; status.hidden = !text; openLink.hidden = !offerTab; };
     // ملفات المواقع الأخرى تمر عبر الخادم حتى لا يمنعها المتصفح.
     const sameOrigin = (src: string) => new URL(src, location.href).origin === location.origin;
     const fetchUrl = (src: string) => (sameOrigin(src) ? src : `/pdf/?src=${encodeURIComponent(src)}`);
@@ -147,6 +153,7 @@
     async function open(src: string, title: string) {
       dialog!.querySelector('.pr-title')!.textContent = title;
       download.href = src;
+      openLink.href = src;
       pageLabel.textContent = '';
       pages.replaceChildren();
       zoom = 1;
@@ -156,18 +163,26 @@
         lib ??= await import(/* @vite-ignore */ `${PDFJS}pdf.min.mjs`);
         lib.GlobalWorkerOptions.workerSrc = `${PDFJS}pdf.worker.min.mjs`;
         doc?.destroy();
-        doc = await lib.getDocument({
+        doc = undefined;
+        // يقرأ الملف على أجزاء (نصف ميجابايت) حسب الصفحات المعروضة فقط.
+        const task = lib.getDocument({
           url: fetchUrl(src),
           disableAutoFetch: true,
+          disableStream: true,
+          rangeChunkSize: 524288,
           cMapUrl: `${PDFJS_ROOT}cmaps/`,
           cMapPacked: true,
           standardFontDataUrl: `${PDFJS_ROOT}standard_fonts/`,
-        }).promise;
+        });
+        task.onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
+          if (total && !doc) say(`جارٍ فتح الملف… ${ar(Math.min(99, Math.round((loaded / total) * 100)))}٪`);
+        };
+        doc = await task.promise;
         const first = (await doc.getPage(1)).getViewport({ scale: 1 });
         say('');
         layout(first.width / first.height);
       } catch {
-        say('تعذر فتح الملف هنا. يمكنك تحميله من زر التحميل بالأعلى.');
+        say('تعذر فتح الملف هنا. يمكنك فتحه في نافذة جديدة أو تحميله.', true);
       }
     }
 

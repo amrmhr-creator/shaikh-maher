@@ -25,7 +25,7 @@ const books = (await getCollection('books')).sort((a, b) => a.data.order - b.dat
           <h2>{b.data.title}</h2>
           <p class="lead">{b.data.summary}</p>
           <div class="actions">
-            <a class="btn" href={u(`/books/${b.id}/`)}>{b.data.kind === 'series' ? 'تفاصيل السلسلة' : 'تفاصيل الكتاب'}</a>
+            <a class="btn" href={u(`/books/${b.id}/`)}>{b.data.kind === 'series' ? 'تصفح تفاصيل السلسلة' : 'تفاصيل الكتاب'}</a>
             {b.data.pdf && <button class="btn ghost" type="button" data-pdf={b.data.pdf} data-pdf-title={b.data.title}><Icon name="book" size={18} /> تصفّح</button>}
             {b.data.pdf && <a class="btn ghost" href={b.data.pdf} download><Icon name="download" size={18} /> تحميل PDF</a>}
           </div>

@@ -26,7 +26,12 @@ req 200 "$B/lessons/"
 req 200 "$B/lessons/01/"; has 'مراتب التوحيد'; has 'media.shaikhmaher.com/audio/5.mp3'; has 'class="ayah"'; lacks 'التفريغ النصي'
 req 200 "$B/lessons/05/"; has 'حقيقة الحياة الدنيا'
 req 200 "$B/books/"
-req 200 "$B/books/rasayel/"; has 'في الإيثار'
+req 200 "$B/books/rasayel/"; has 'في الإيثار'; has 'class="ch-grid"'; has 'media/books/rasayel/01.webp'
+req 200 "$B/books/"; has 'تصفح تفاصيل السلسلة'
+# قارئ الكتب يطلب الملف على أجزاء، فلازم الوسيط يرد بالجزء المطلوب فقط
+code=$(curl -s -o "$OUT" -w '%{http_code}' -r 0-1023 "$B/pdf/?src=https%3A%2F%2Fmedia.shaikhmaher.com%2F2026%2F07%2F1-1.pdf")
+[ "$code" = 206 ] && [ "$(wc -c < "$OUT")" = 1024 ] || fail "pdf range -> $code, $(wc -c < "$OUT") bytes"
+pass=$((pass + 1))
 req 200 "$B/fawaid/"
 req 200 "$B/fawaid/haqiqat-alistighfar/"; has 'حقيقة الاستغفار'
 req 200 "$B/gallery/"; has 'sheikh-photo.webp'

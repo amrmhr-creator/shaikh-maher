@@ -3,7 +3,7 @@ import { getEntry, renderBody } from '../../lib/content';
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import Icon from '../../components/Icon.astro';
-import { u } from '../../lib/site';
+import { ar, u } from '../../lib/site';
 import PdfReader from '../../components/PdfReader.astro';
 
 const book = await getEntry('books', Astro.params.slug ?? '');
@@ -30,7 +30,24 @@ const html = renderBody(book);
     <div>
       {html && <div class="prose" set:html={html} />}
       <h2>{d.chapterLabel}</h2>
-      {d.chapters.length > 0
+      {d.chapters.length > 0 && d.chapters.some((c) => c.thumb)
+        ? <ol class="ch-grid">{d.chapters.map((c, i) => (
+            <li class="ch-card">
+              {c.pdf
+                ? <button class="ch-thumb" type="button" data-pdf={c.pdf} data-pdf-title={c.title} aria-label={`تصفّح ${c.title}`}>
+                    {c.thumb ? <img src={u(c.thumb)} alt="" width="360" height="645" loading="lazy" decoding="async" /> : <span class="ch-num">{ar(i + 1)}</span>}
+                  </button>
+                : <span class="ch-thumb">{c.thumb ? <img src={u(c.thumb)} alt="" width="360" height="645" loading="lazy" decoding="async" /> : <span class="ch-num">{ar(i + 1)}</span>}</span>}
+              <span class="ch-title">{c.title}</span>
+              {c.pdf && (
+                <span class="ch-actions">
+                  <button class="btn ghost sm" type="button" data-pdf={c.pdf} data-pdf-title={c.title}>تصفّح</button>
+                  <a class="btn ghost sm" href={c.pdf} download aria-label={`تحميل ${c.title}`}><Icon name="download" size={16} /></a>
+                </span>
+              )}
+            </li>
+          ))}</ol>
+        : d.chapters.length > 0
         ? <ol class="chapters">{d.chapters.map((c) => (
             <li>
               <span class="ch-title">{c.title}</span>
@@ -62,6 +79,27 @@ const html = renderBody(book);
     background: var(--gold-soft); color: var(--deep); font-weight: 700;
   }
   .ch-title { flex: 1; min-width: 0; line-height: 1.7; }
+  /* فصول لها صور مصغّرة: شبكة بطاقات صغيرة، والصور تُحمَّل عند الوصول إليها فقط */
+  .ch-grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 18px 14px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 104px), 1fr));
+  }
+  @media (min-width: 700px) { .ch-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } }
+  .ch-card { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .ch-thumb {
+    display: grid; place-items: center;
+    aspect-ratio: 360 / 645; width: 100%;
+    padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+    background: var(--surface-2); color: var(--accent); font: inherit; cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: transform .2s, box-shadow .2s;
+  }
+  button.ch-thumb:hover, button.ch-thumb:focus-visible { transform: translateY(-3px); box-shadow: var(--shadow-lift); }
+  .ch-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ch-num { font-family: var(--font-display); font-size: 2rem; }
+  .ch-card .ch-title { font-size: .95rem; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .ch-card .ch-actions { margin-top: auto; flex-wrap: wrap; }
   .ch-actions { display: flex; gap: 6px; flex: none; }
   .btn.sm { padding: 6px 12px; font-size: .9rem; }
   .cover {
