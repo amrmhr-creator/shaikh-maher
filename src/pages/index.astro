@@ -30,26 +30,19 @@ const sections = [
 ] as const;
 ---
 <Base>
-  <section class="hero pattern">
+  <section class="hero" style={`--hero-photo: url(${u('/media/images/sheikh-hero.webp')})`}>
     <div class="wrap hero-inner">
-      <div class="hero-text">
-        <p class="eyebrow">١٩٠٨ – ١٩٨٧ م · رحمه الله</p>
-        <h1>فضيلة الشيخ<br />ماهر إسماعيل جاهين</h1>
-        <p class="lead">عالم نوبي ربّى تلاميذه على التوحيد وتزكية النفس. هنا نجمع تراثه من دروس صوتية ورسائل وفوائد، ليبقى علمه نورًا لطلاب العلم.</p>
-        <div class="actions">
-          <a class="btn gold" href={u('/lessons/')}><Icon name="headphones" size={18} /> استمع إلى الدروس</a>
-          <a class="btn on-deep" href={u('/books/')}><Icon name="book" size={18} /> تصفح الكتب</a>
-        </div>
-        <form class="hero-search" action={u('/search/')} role="search">
-          <Icon name="search" size={18} />
-          <input type="search" name="q" placeholder="ابحث في الدروس والكتب والفوائد…" aria-label="بحث" />
-        </form>
+      <p class="eyebrow">١٩٠٨ – ١٩٨٧ م · رحمه الله</p>
+      <h1>فضيلة الشيخ<br />ماهر إسماعيل جاهين</h1>
+      <p class="lead">عالم نوبي ربّى تلاميذه على التوحيد وتزكية النفس. هنا نجمع تراثه من دروس صوتية ورسائل وفوائد، ليبقى علمه نورًا لطلاب العلم.</p>
+      <div class="actions">
+        <a class="btn gold" href={u('/lessons/')}><Icon name="headphones" size={18} /> استمع إلى الدروس</a>
+        <a class="btn on-deep" href={u('/books/')}><Icon name="book" size={18} /> تصفح الكتب</a>
       </div>
-      <figure class="hero-figure">
-        <div class="arch">
-          <img src={u('/media/images/shaikh-maher-young.webp')} alt="الشيخ ماهر إسماعيل جاهين" width="945" height="1024" />
-        </div>
-      </figure>
+      <form class="hero-search" action={u('/search/')} role="search">
+        <Icon name="search" size={18} />
+        <input type="search" name="q" placeholder="ابحث في الدروس والكتب والفوائد…" aria-label="بحث" />
+      </form>
     </div>
   </section>
 
@@ -167,30 +160,39 @@ const sections = [
 </Base>
 
 <style>
-  .hero { padding-block: 56px 96px; }
-  .hero-inner > * { min-width: 0; }
-  .hero-inner {
+  .hero {
+    position: relative;
+    isolation: isolate;
     display: grid;
-    gap: 40px;
     align-items: center;
+    min-height: 64vh;
+    padding-block: 72px 112px;
+    background: var(--deep-2) var(--hero-photo) center 22% / cover no-repeat;
+    text-align: center;
   }
-  @media (min-width: 880px) {
-    .hero-inner { grid-template-columns: 1.35fr 1fr; }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(240deg, rgb(11 45 37 / 72%) 0%, rgb(10 97 4 / 55%) 87%), rgb(0 0 0 / 18%);
   }
-  .hero h1 { color: var(--on-deep); font-size: clamp(2.4rem, 6vw, 3.8rem); }
+  .hero-inner { display: grid; justify-items: center; }
+  .hero-inner > * { min-width: 0; }
+  .hero h1 { color: var(--on-deep); font-size: clamp(2.4rem, 7vw, 4.4rem); text-shadow: 0 2px 18px rgb(0 0 0 / 45%); }
   .hero .eyebrow { color: var(--gold-on-deep); }
-  .hero .lead { color: var(--on-deep-muted); margin-bottom: 28px; }
-  .hero-figure { margin: 0; justify-self: center; width: min(100%, 340px); }
-  .hero-figure .arch { border-color: var(--gold-on-deep); background: rgb(255 255 255 / 4%); }
+  .hero .lead { color: var(--on-deep); max-width: 640px; margin-bottom: 28px; text-shadow: 0 1px 10px rgb(0 0 0 / 50%); }
+  .hero .actions { justify-content: center; }
   .hero-search {
     margin-top: 26px;
     display: flex;
     align-items: center;
     gap: 10px;
-    max-width: 460px;
+    width: min(100%, 460px);
     padding: 4px 18px;
     border-radius: 999px;
-    background: rgb(255 255 255 / 8%);
+    background: rgb(11 45 37 / 55%);
+    backdrop-filter: blur(4px);
     border: 1px solid rgb(216 180 106 / 35%);
     color: var(--on-deep-muted);
   }
