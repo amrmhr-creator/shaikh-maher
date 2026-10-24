@@ -37,7 +37,7 @@ const isCurrent = (href: string) => {
     <a class="skip" href="#main">تخطَّ إلى المحتوى</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href={u('/')}>
+        <a class:list={['brand', { 'logo-only': logoOnly }]} href={u('/')}>
           {logo ? <img class="brand-logo" src={logo} alt={logoOnly ? SITE_SHORT : ''} /> : <span class="brand-mark" aria-hidden="true">م</span>}
           {!logoOnly && <span class="brand-text"><strong>{SITE_SHORT}</strong></span>}
         </a>

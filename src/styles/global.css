@@ -163,6 +163,16 @@ p {
   object-fit: contain;
   flex: none;
 }
+.logo-only .brand-logo {
+  height: 66px;
+  max-width: 120px;
+  margin-block: 6px;
+}
+@media (min-width: 700px) {
+  .logo-only .brand-logo {
+    height: 88px;
+  }
+}
 .brand-text strong {
   display: block;
   font-family: var(--font-display);
