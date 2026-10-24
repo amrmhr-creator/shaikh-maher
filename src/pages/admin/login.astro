@@ -13,7 +13,7 @@ if (Astro.request.method === 'POST') {
   const ip = clientIp(Astro.request, Astro.clientAddress);
   const form = await Astro.request.formData();
   username = String(form.get('username') ?? '').trim();
-  if (loginBlocked(ip)) {
+  if (loginBlocked(ip, username)) {
     error = 'محاولات كثيرة خاطئة. حاول مرة أخرى بعد ربع ساعة.';
   } else {
     const user = await login(username, String(form.get('password') ?? ''), ip);

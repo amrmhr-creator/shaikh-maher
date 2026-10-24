@@ -1,3 +1,4 @@
+import type { APIContext, MiddlewareNext } from 'astro';
 import { defineMiddleware } from 'astro:middleware';
 import { currentUser } from './lib/auth';
 import { UPLOAD_URL, serveUpload } from './lib/uploads';
@@ -27,8 +28,24 @@ function legacyRedirect(path: string): string | undefined {
   return page && `${base}${page}`;
 }
 
-// كل صفحات /admin تحتاج تسجيل دخول، ما عدا صفحة الدخول نفسها.
+// رؤوس أمان لكل الردود: منع عرض الموقع داخل إطار في موقع آخر (حماية اللوحة من خداع النقرات)،
+// ومنع المتصفح من تخمين نوع الملف، وعدم إرسال الرابط كاملًا للمواقع الخارجية.
+const SECURITY_HEADERS = {
+  'X-Frame-Options': 'SAMEORIGIN',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+};
+
 export const onRequest = defineMiddleware(async (ctx, next) => {
+  const res = await route(ctx, next);
+  try {
+    for (const [k, v] of Object.entries(SECURITY_HEADERS)) res.headers.set(k, v);
+  } catch {}
+  return res;
+});
+
+// كل صفحات /admin تحتاج تسجيل دخول، ما عدا صفحة الدخول نفسها.
+async function route(ctx: APIContext, next: MiddlewareNext): Promise<Response> {
   const path = ctx.url.pathname;
   const legacy = legacyRedirect(path);
   if (legacy) return ctx.redirect(legacy + ctx.url.search, 301);
@@ -59,4 +76,4 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
     res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   } catch {}
   return res;
-});
+}
