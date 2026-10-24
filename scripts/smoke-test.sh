@@ -23,7 +23,7 @@ post() { req "$1" -H "Origin: $B" "${@:2}"; }
 echo '== public pages'
 req 200 "$B/"; has 'حقيقة الحياة الدنيا'; has 'الشيخ فتح الله'
 req 200 "$B/lessons/"
-req 200 "$B/lessons/01/"; has 'حقيقة الحياة الدنيا'; has 'shaikhmaher.com/wp-content/uploads/2026/03/1.mp3'
+req 200 "$B/lessons/01/"; has 'حقيقة الحياة الدنيا'; has 'media.shaikhmaher.com/audio/1.mp3'
 req 200 "$B/books/"
 req 200 "$B/books/rasayel/"; has 'في الإيثار'
 req 200 "$B/fawaid/"
