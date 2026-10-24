@@ -18,10 +18,11 @@ jobs:
       - name: Probe pages
         run: |
           D="https://$(jq -r .domain .hostinger/site.json)"
-          for p in / /lessons/01/ /books/rasayel/ /gallery/ /admin/login/ /media/images/sheikh-photo.webp; do
+          for p in / /lessons/01/ /books/rasayel/ /gallery/ /admin/login/ /media/images/sheikh-hero.webp; do
             code=$(curl -s -o page.html -w '%{http_code}' --max-time 60 "$D$p")
             title=$(grep -o '<title>[^<]*' page.html | head -1 | sed 's/<title>//')
             echo "$code $p  $title"
           done
+          echo "hero photo on /: $(curl -s --max-time 60 "$D/" | grep -c sheikh-hero.webp)"
           echo '--- first lines of /'
           curl -s --max-time 60 "$D/" | head -c 1500
