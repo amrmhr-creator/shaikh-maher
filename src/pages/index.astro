@@ -50,6 +50,10 @@ const sections = [
   </section>
 
   <div class="wrap">
+    <section class="section home-poem" aria-label="أبيات في الشيخ">
+      <Poem poem={HOME_POEM} showTitle={false} preview={4} />
+    </section>
+
     <section class="tiles" aria-label="أقسام الموقع">
       {sections.map((s) => (
         <a class="card link tile" href={u(s.href)}>
@@ -57,10 +61,6 @@ const sections = [
           <strong>{s.title}</strong>
         </a>
       ))}
-    </section>
-
-    <section class="section home-poem" aria-label="أبيات في الشيخ">
-      <Poem poem={HOME_POEM} showTitle={false} preview={4} />
     </section>
 
     {featured && (
@@ -216,7 +216,7 @@ const sections = [
     display: grid;
     gap: 16px;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-    margin-top: -56px;
+    margin-top: 48px;
     position: relative;
   }
   .fathallah {
