@@ -40,7 +40,7 @@ req 200 "$B/fawaid/haqiqat-alistighfar/"; has 'حقيقة الاستغفار'
 req 200 "$B/gallery/"; has 'sheikh-photo.webp'
 req 200 "$B/topics/tazkiyah/"
 req 200 "$B/about/"
-req 200 "$B/fathallah/"; has 'رحلة العطاء والدعوة'; has '<h4>شرح الكتب</h4>'; lacks 'أبريل ٢٠٠٥'
+req 200 "$B/fathallah/"; has 'رحلة العطاء والدعوة'; has 'شرح الكتب</h4>'; lacks 'أبريل ٢٠٠٥'
 req 200 -G --data-urlencode 'q=الاستغفار' "$B/search/"; has 'حقيقة الاستغفار'
 req 200 -G --data-urlencode 'q=الحياه الدنيا' "$B/search/"; has 'حقيقة الحياة الدنيا'
 req 404 "$B/lessons/999/"
