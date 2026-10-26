@@ -556,6 +556,7 @@ video {
 }
 @media (max-width: 640px) { .mark { width: 14px; height: 14px; box-shadow: inset 0 0 0 3px var(--bg), inset 0 0 0 7px var(--gold); } }
 .chapter h2 { margin: 0 0 18px; line-height: 1.6; color: var(--accent); }
+.chapter h4 { margin: 1.1em 0 0.4em; font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; color: var(--gold); }
 .chapter > p { color: var(--text); font-size: 1.08rem; line-height: 2; margin: 0 0 16px; }
 .chapter blockquote {
   margin: 20px 0;
